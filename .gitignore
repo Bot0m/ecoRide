@@ -20,3 +20,15 @@
 ###< symfony/asset-mapper ###
 /var/
 .env.local
+
+# Front-end build
+/node_modules/
+/dist/
+/build/
+/public/css/
+/public/js/
+
+# === IDE / OS ===
+.vscode/
+.idea/
+.DS_Store
