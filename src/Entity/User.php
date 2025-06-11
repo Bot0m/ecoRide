@@ -1,0 +1,333 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+class User
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'string', length: 50)]
+    private ?string $pseudo = null;
+
+    #[ORM\Column(type: 'string', length: 180)]
+    private ?string $email = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $credits = null;
+
+    /**
+     * @var Collection<int, Vehicle>
+     */
+    #[ORM\OneToMany(targetEntity: Vehicle::class, mappedBy: 'user')]
+    private Collection $vehicles;
+
+    #[ORM\OneToOne(inversedBy: 'user', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Preference $preference = null;
+
+    /**
+     * @var Collection<int, Ride>
+     */
+    #[ORM\OneToMany(mappedBy: 'driver', targetEntity: Ride::class, orphanRemoval: true)]
+    private Collection $drivenRides;
+
+    /**
+     * @var Collection<int, Ride>
+     */
+    #[ORM\ManyToMany(targetEntity: Ride::class, inversedBy: 'passengers')]
+    private Collection $ridesAsPassenger;
+
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'author')]
+    private Collection $reviewsGiven;
+
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'reviewedUser')]
+    private Collection $reviewsReceived;
+
+    /**
+     * @var Collection<int, Participation>
+     */
+    #[ORM\OneToMany(targetEntity: Participation::class, mappedBy: 'user')]
+    private Collection $participations;
+
+    public function __construct()
+    {
+        $this->vehicles = new ArrayCollection();
+        $this->drivenRides = new ArrayCollection();
+        $this->ridesAsPassenger = new ArrayCollection();
+        $this->reviewsGiven = new ArrayCollection();
+        $this->reviewsReceived = new ArrayCollection();
+        $this->participations = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function setPseudo(string $pseudo): static
+    {
+        $this->pseudo = $pseudo;
+
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getCredits(): ?int
+    {
+        return $this->credits;
+    }
+
+    public function setCredits(int $credits): static
+    {
+        $this->credits = $credits;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vehicle>
+     */
+    public function getVehicles(): Collection
+    {
+        return $this->vehicles;
+    }
+
+    public function addVehicle(Vehicle $vehicle): static
+    {
+        if (!$this->vehicles->contains($vehicle)) {
+            $this->vehicles->add($vehicle);
+            $vehicle->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVehicle(Vehicle $vehicle): static
+    {
+        if ($this->vehicles->removeElement($vehicle)) {
+            // set the owning side to null (unless already changed)
+            if ($vehicle->getOwner() === $this) {
+                $vehicle->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPreference(): ?Preference
+    {
+        return $this->preference;
+    }
+
+    public function setPreference(Preference $preference): static
+    {
+        $this->preference = $preference;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ride>
+     */
+    public function getDrivenRides(): Collection
+    {
+        return $this->drivenRides;
+    }
+
+    public function addDrivenRide(Ride $drivenRide): static
+    {
+        if (!$this->drivenRides->contains($drivenRide)) {
+            $this->drivenRides->add($drivenRide);
+            $drivenRide->setDriver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDrivenRide(Ride $drivenRide): static
+    {
+        if ($this->drivenRides->removeElement($drivenRide)) {
+            // set the owning side to null (unless already changed)
+            if ($drivenRide->getDriver() === $this) {
+                $drivenRide->setDriver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Ride>
+     */
+    public function getRidesAsPassenger(): Collection
+    {
+        return $this->ridesAsPassenger;
+    }
+
+    public function addRidesAsPassenger(Ride $ridesAsPassenger): static
+    {
+        if (!$this->ridesAsPassenger->contains($ridesAsPassenger)) {
+            $this->ridesAsPassenger->add($ridesAsPassenger);
+        }
+
+        return $this;
+    }
+
+    public function removeRidesAsPassenger(Ride $ridesAsPassenger): static
+    {
+        $this->ridesAsPassenger->removeElement($ridesAsPassenger);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviewsGiven(): Collection
+    {
+        return $this->reviewsGiven;
+    }
+
+    public function addReviewsGiven(Review $reviewsGiven): static
+    {
+        if (!$this->reviewsGiven->contains($reviewsGiven)) {
+            $this->reviewsGiven->add($reviewsGiven);
+            $reviewsGiven->setAuthor($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReviewsGiven(Review $reviewsGiven): static
+    {
+        if ($this->reviewsGiven->removeElement($reviewsGiven)) {
+            // set the owning side to null (unless already changed)
+            if ($reviewsGiven->getAuthor() === $this) {
+                $reviewsGiven->setAuthor(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviewsReceived(): Collection
+    {
+        return $this->reviewsReceived;
+    }
+
+    public function addReviewsReceived(Review $reviewsReceived): static
+    {
+        if (!$this->reviewsReceived->contains($reviewsReceived)) {
+            $this->reviewsReceived->add($reviewsReceived);
+            $reviewsReceived->setReviewedUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReviewsReceived(Review $reviewsReceived): static
+    {
+        if ($this->reviewsReceived->removeElement($reviewsReceived)) {
+            // set the owning side to null (unless already changed)
+            if ($reviewsReceived->getReviewedUser() === $this) {
+                $reviewsReceived->setReviewedUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Participation>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(Participation $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipation(Participation $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            // set the owning side to null (unless already changed)
+            if ($participation->getUser() === $this) {
+                $participation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+}
