@@ -14,6 +14,7 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordC
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
+use App\Entity\User;
 
 class LoginAuthenticator extends AbstractLoginFormAuthenticator
 {
@@ -40,15 +41,21 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
-    {
-        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
-            return new RedirectResponse($targetPath);
-        }
-
-        // For example:
-        // return new RedirectResponse($this->urlGenerator->generate('some_route'));
-        throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
+{
+    if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
+        return new RedirectResponse($targetPath);
     }
+
+    $user = $token->getUser();
+
+    $route = match (true) {
+        in_array('ROLE_ADMIN', $user->getRoles()) => 'admin_dashboard',
+        in_array('ROLE_EMPLOYE', $user->getRoles()) => 'employe_dashboard',
+        default => 'mon_compte',
+    };
+
+    return new RedirectResponse($this->urlGenerator->generate($route));
+}
 
     protected function getLoginUrl(Request $request): string
     {
