@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
@@ -12,14 +12,10 @@
         {% endblock %}
     </head>
     <body>
+        {% include 'partials/_header.html.twig' %}
         {% block body %}
-        <div class="bg-primary text-background font-title text-4xl p-4">
-        Couleur primaire avec police Raleway (titre)
-        </div>
-        <div class="bg-accent text-textPrimary font-body text-base p-4 mt-4">
-        Couleur accent avec police Quicksand (texte)
-        </div>
         {% endblock %}
+        
         <script src="{{ asset('build/flowbite.min.js') }}"></script>
     </body>
 </html>
