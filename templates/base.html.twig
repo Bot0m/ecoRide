@@ -11,11 +11,16 @@
             {% block importmap %}{{ importmap('app') }}{% endblock %}
         {% endblock %}
     </head>
-    <body>
+    <body class="flex flex-col min-h-screen bg-background text-textPrimary font-[Quicksand]">
+
         {% include 'partials/_header.html.twig' %}
-        {% block body %}
-        {% endblock %}
-        
+
+        <main class="flex-grow">
+            {% block body %}{% endblock %}
+        </main>
+
+        {% include 'partials/_footer.html.twig' %}
+
         <script src="{{ asset('build/flowbite.min.js') }}"></script>
     </body>
 </html>
