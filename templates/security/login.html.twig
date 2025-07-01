@@ -1,28 +1,46 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
-        </div>
-    {% endif %}
+<div class="min-h-screen pt-20 flex items-center justify-center bg-[url('/images/pexels-lkloeppel-577696.jpg')] bg-cover bg-center bg-no-repeat px-4">
+    <div class="w-full max-w-md backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8">
+        <h1 class="text-subtitle font-title text-center text-textPrimary mb-6">Connexion</h1>
 
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+        {% if error %}
+            <div class="mb-4 text-sm text-red-600 bg-red-100 p-2 rounded">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+        <form method="post" class="space-y-4">
+            <div>
+                <label for="inputEmail" class="block mb-1 text-sm font-medium text-tSecondaryDark">Adresse e-mail</label>
+                <input type="email" name="email" placeholder="Adresse e-mail" id="inputEmail" autocomplete="email"
+                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                    value="{{ last_username }}" required autofocus>
+            </div>
+
+            <div>
+                <label for="inputPassword" class="block mb-1 text-sm font-medium text-tSecondaryDark">Mot de passe</label>
+                <input type="password" name="password" placeholder="Mot de passe" id="inputPassword" autocomplete="current-password"
+                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                    required>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <button type="submit"
+                class="w-full text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md focus:ring-4 focus:outline-none focus:ring-primaryLight font-medium rounded-xl text-sm px-5 py-3 text-center transition-all duration-300">
+                Se connecter
+            </button>
+
+            <p class="text-sm font-medium text-textSecondary text-center">
+                Pas encore de compte ?
+                <a href="{{ path('app_register') }}" class="text-accent hover:underline"> Créer un compte</a>
+            </p>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,6 +1,6 @@
 
 
-<footer class="bg-primary shadow-sm mt-auto">
+<footer class="backdrop-blur-xl backdrop-saturate-150 bg-primary/80 border-t border-white/20 shadow-lg mt-auto">
     <div class="w-full max-w-screen-xl mx-auto p-3 md:py-4">
         <div class="sm:flex sm:items-center sm:justify-between">
             <a href="{{ path('homepage') }}" class="flex items-center space-x-3 rtl:space-x-reverse">
@@ -11,18 +11,18 @@
 
                 </li>
                 <li>
-                    <a href="{{ path('app_legal') }}" class="block py-1 px-3 text-body font-base text-textSecondary hover:text-accentDark">Mentions légales</a>
+                    <a href="{{ path('app_legal') }}" class="block py-1 px-3 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300">Mentions légales</a>
                 </li>
                 <li>
-                    <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-1 px-3 text-body font-base text-textSecondary hover:text-accentDark">Contact
+                    <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-1 px-3 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300">Contact
                     </button>
                 </li>
             </ul>
         </div>
     </div>
-    <div class="bg-primaryLight">
+    <div class="backdrop-blur-lg bg-primaryLight/60 border-t border-white/10">
         <div class="w-full max-w-screen-xl mx-auto px-3 py-2">
-            <span class="block text-body font-base text-textSecondary sm:text-center">© 2025 <a href="{{ path('homepage') }}" class="hover:underline">Ecoride</a>.Tous droits réservés.</span>
+            <span class="block text-body font-base text-textSecondary sm:text-center">© 2025 <a href="{{ path('homepage') }}" class="hover:underline hover:text-accent transition-colors duration-300">Ecoride</a>. Tous droits réservés.</span>
         </div>
     </div>
 </footer>
