@@ -1,0 +1,56 @@
+
+<!-- drawer -->
+<div id="drawer-contact"
+     class="fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-secondary w-80"
+     tabindex="-1"
+     aria-labelledby="drawer-contact-label">
+
+  <h5 id="drawer-label"
+      class="inline-flex items-center mb-6 font-semibold uppercase text-body font-base text-textSecondary">
+    Contact
+  </h5>
+
+  <button type="button"
+          data-drawer-hide="drawer-contact"
+          aria-controls="drawer-contact"
+          class="text-accent bg-transparent hover:bg-accentDark hover:text-accentLight rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5">
+    ✕
+  </button>
+
+  {% for message in app.flashes('success') %}
+    <div class="bg-secondaryDark text-textPrimary p-2 rounded mb-4 text-sm">
+      {{ message }}
+    </div>
+  {% endfor %}
+
+  {{ form_start(contactForm, {
+    attr: {
+      action: path('app_contact'),
+      method: 'POST',
+      class: 'space-y-4'
+    }
+  }) }}
+
+    {{ form_row(contactForm.email, {
+      label_attr: { class: 'text-textSecondary font-body mb-1' },
+      attr: { placeholder: 'Votre e-mail', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark' }
+    }) }}
+
+    {{ form_row(contactForm.sujet, {
+      label_attr: { class: 'text-textSecondary font-body mb-1' },
+      attr: { placeholder: 'Objet du message', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark' }
+    }) }}
+
+    {{ form_row(contactForm.message, {
+      label_attr: { class: 'text-textSecondary font-body mb-1' },
+      attr: { placeholder: 'Votre message...', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark ' }
+    }) }}
+
+    <button type="submit"
+            class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark rounded-lg px-5 py-2.5 w-full">
+      Envoyer
+    </button>
+
+  {{ form_end(contactForm) }}
+
+</div>
