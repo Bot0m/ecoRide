@@ -1,7 +1,7 @@
 
 <!-- drawer -->
 <div id="drawer-contact"
-     class="fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-transform -translate-x-full bg-secondary w-80"
+     class="fixed top-0 left-0 z-[60] h-screen p-6 overflow-y-auto transition-transform -translate-x-full backdrop-blur-2xl backdrop-saturate-150 backdrop-contrast-125 bg-gradient-to-b from-secondary/70 via-secondary/80 to-secondary/90 border-r-2 border-white/30 shadow-2xl w-80"
      tabindex="-1"
      aria-labelledby="drawer-contact-label">
 
@@ -13,12 +13,12 @@
   <button type="button"
           data-drawer-hide="drawer-contact"
           aria-controls="drawer-contact"
-          class="text-accent bg-transparent hover:bg-accentDark hover:text-accentLight rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5">
+          class="text-accent backdrop-blur-sm bg-white/10 hover:bg-accent hover:text-textPrimary rounded-xl text-sm w-8 h-8 absolute top-2.5 end-2.5 transition-all duration-300 flex items-center justify-center">
     ✕
   </button>
 
   {% for message in app.flashes('success') %}
-    <div class="bg-secondaryDark text-textPrimary p-2 rounded mb-4 text-sm">
+    <div class="backdrop-blur-sm bg-accent/20 border border-accent/30 text-accent p-3 rounded-xl mb-4 text-sm">
       {{ message }}
     </div>
   {% endfor %}
@@ -33,21 +33,21 @@
 
     {{ form_row(contactForm.email, {
       label_attr: { class: 'text-textSecondary font-body mb-1' },
-      attr: { placeholder: 'Votre e-mail', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark' }
+      attr: { placeholder: 'Votre e-mail', class: 'w-full p-3 border rounded-xl backdrop-blur-sm bg-backgroundDark/80 text-textPrimary placeholder-tSecondaryLight border-white/30 focus:border-accent focus:bg-backgroundDark/90 transition-all duration-300' }
     }) }}
 
     {{ form_row(contactForm.sujet, {
       label_attr: { class: 'text-textSecondary font-body mb-1' },
-      attr: { placeholder: 'Objet du message', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark' }
+      attr: { placeholder: 'Objet du message', class: 'w-full p-3 border rounded-xl backdrop-blur-sm bg-backgroundDark/80 text-textPrimary placeholder-tSecondaryLight border-white/30 focus:border-accent focus:bg-backgroundDark/90 transition-all duration-300' }
     }) }}
 
     {{ form_row(contactForm.message, {
       label_attr: { class: 'text-textSecondary font-body mb-1' },
-      attr: { placeholder: 'Votre message...', class: 'w-full p-2 border rounded font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark ' }
+      attr: { placeholder: 'Votre message...', class: 'w-full p-3 border rounded-xl backdrop-blur-sm bg-backgroundDark/80 text-textPrimary placeholder-tSecondaryLight border-white/30 focus:border-accent focus:bg-backgroundDark/90 transition-all duration-300 min-h-[100px]' }
     }) }}
 
     <button type="submit"
-            class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark rounded-lg px-5 py-2.5 w-full">
+            class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent/90 hover:bg-accent backdrop-blur-sm rounded-xl px-5 py-3 w-full transition-all duration-300 shadow-lg hover:shadow-xl">
       Envoyer
     </button>
 
