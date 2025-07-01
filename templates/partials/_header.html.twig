@@ -112,7 +112,8 @@
         <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accentDark">Voyager</a>
       </li>
       <li>
-        <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accentDark">Contact</a>
+        <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accentDark">Contact
+        </button>
       </li>
     </ul>
   </div>
@@ -160,5 +161,18 @@ document.getElementById('logoutModal').addEventListener('click', function(event)
     if (event.target === this) {
         this.classList.add('hidden');
     }
+});
+
+// Fermer le menu mobile quand on clique sur un lien
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenu = document.getElementById('navbar-user');
+    const mobileMenuLinks = mobileMenu.querySelectorAll('a, button');
+    
+    mobileMenuLinks.forEach(function(link) {
+        link.addEventListener('click', function() {
+            // Fermer le menu mobile
+            mobileMenu.classList.add('hidden');
+        });
+    });
 });
 </script>
