@@ -27,6 +27,7 @@
 /build/
 /public/css/
 /public/js/
+/public/build/
 
 # === IDE / OS ===
 .vscode/
