@@ -16,6 +16,31 @@ class RideRepository extends ServiceEntityRepository
         parent::__construct($registry, Ride::class);
     }
 
+    public function findMatchingRides(string $departure, string $arrival, \DateTimeInterface $date): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.departure LIKE :departure')
+            ->andWhere('r.arrival LIKE :arrival')
+            ->andWhere('r.date = :date')
+            ->setParameter('departure', '%' . $departure . '%')
+            ->setParameter('arrival', '%' . $arrival . '%')
+            ->setParameter('date', $date->format('Y-m-d'))
+            ->orderBy('r.date', 'ASC')
+            ->addOrderBy('r.departure', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findUpcomingRides(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.date > :now')
+            ->setParameter('now', new \DateTimeImmutable('today'))
+            ->orderBy('r.date', 'ASC')
+            ->addOrderBy('r.departureTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
     //    /**
     //     * @return Ride[] Returns an array of Ride objects
     //     */
