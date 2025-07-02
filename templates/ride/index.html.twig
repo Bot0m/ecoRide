@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Covoiturages - Ecoride{% endblock %}
+
+{% block body %}
+<div class="h-screen pt-20 flex items-center justify-center bg-[url('/images/pexels-lkloeppel-577696.jpg')] bg-cover bg-center bg-no-repeat px-4">
+    
+    <!-- Hero avec formulaire de recherche -->
+    <section class="h-screen flex items-start justify-center pt-48">
+        <div class="text-center px-4">
+            <!-- Carte glassmorphique horizontale -->
+            <div class="w-full max-w-6xl backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 mb-4">
+                <h1 class="text-2xl font-title text-textPrimary mb-6">Rechercher un covoiturage</h1>
+                
+                <form method="get" action="{{ path('app_rides') }}" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                    <input
+                        type="text"
+                        name="departure"
+                        placeholder="Ville de départ"
+                        value="{{ search.departure ?? '' }}"
+                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                    />
+                    <input
+                        type="text"
+                        name="arrival"
+                        placeholder="Ville d'arrivée"
+                        value="{{ search.arrival ?? '' }}"
+                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                    />
+                    
+                    <div class="relative max-w-sm">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-tSecondaryLight" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                            </svg>
+                        </div>
+                        <input name="date" type="date" 
+                            value="{{ search.date ?? '' }}"
+                            class="font-body text-secondary bg-backgroundDark border border-accentDark text-textPrimary placeholder-tSecondaryLight text-sm rounded-lg block w-full ps-10 p-2.5 focus:border-accentDark" 
+                            placeholder="Date de départ">
+                    </div>
+
+                    <form class="max-w-xs mx-auto">
+                    <div class="relative flex items-center max-w-[8rem]">
+                        <button type="button" id="decrement-button" data-input-counter-decrement="quantity-input" class="group bg-background hover:bg-backgroundDark border border-accentDark rounded-s-lg p-3 h-11">
+                            <svg class="w-3 h-3 text-tSecondaryLight group-hover:text-textPrimary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
+                            </svg>
+                        </button>
+                        <input type="text" id="quantity-input" data-input-counter aria-describedby="helper-text-explanation" class="font-body text-secondary bg-backgroundDark border-x-0 border-accentDark h-11 text-center text-textPrimary text-sm block w-full py-2.5 focus:border-accentDark" value="1" min="1" max="4" required />
+                        <button type="button" id="increment-button" data-input-counter-increment="quantity-input" class="group bg-background hover:bg-backgroundDark border border-accentDark rounded-e-lg p-3 h-11">
+                            <svg class="w-3 h-3 text-tSecondaryLight group-hover:text-textPrimary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark rounded-lg text-sm px-4 py-2 transition-all duration-300">
+                        Rechercher
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+{% endblock %}
