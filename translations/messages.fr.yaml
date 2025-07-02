@@ -1,0 +1,15 @@
+# Messages de validation pour les formulaires
+"Please enter a password": "Veuillez saisir un mot de passe"
+"Your password should be at least {{ limit }} characters": "Votre mot de passe doit contenir au moins {{ limit }} caractères"
+"You should agree to our terms.": "Vous devez accepter nos conditions d'utilisation."
+"This value should not be blank.": "Ce champ ne peut pas être vide."
+"This value is not a valid email address.": "Veuillez saisir une adresse e-mail valide."
+
+# Messages d'erreur spécifiques
+form_error:
+  csrf: "Token de sécurité invalide. Veuillez rafraîchir la page et réessayer."
+  registration_failed: "L'inscription a échoué. Veuillez vérifier les informations saisies."
+  email_already_used: "Cette adresse e-mail est déjà utilisée."
+  
+# Messages de succès
+registration_success: "Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter." 

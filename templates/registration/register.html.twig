@@ -1,19 +1,71 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Inscription{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
 
-    {{ form_errors(registrationForm) }}
+<div class="h-screen pt-20 flex items-center justify-center bg-[url('/images/pexels-lkloeppel-577696.jpg')] bg-cover bg-center bg-no-repeat px-4">
+    <div class="w-full max-w-md backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8">
+        <h1 class="text-subtitle font-title text-center text-textPrimary mb-6">Inscription</h1>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+        {{ form_start(registrationForm, {'attr': {'class': 'space-y-4'}}) }}
+            
+            <div>
+                {{ form_label(registrationForm.pseudo, 'Pseudo', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
+                {{ form_widget(registrationForm.pseudo, {
+                    'attr': {
+                        'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
+                        'placeholder': 'Votre pseudo'
+                    }
+                }) }}
+                {% if form_errors(registrationForm.pseudo) %}
+                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
+                        {{ form_errors(registrationForm.pseudo) }}
+                    </div>
+                {% endif %}
+            </div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+            <div>
+                {{ form_label(registrationForm.email, 'Adresse e-mail', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
+                {{ form_widget(registrationForm.email, {
+                    'attr': {
+                        'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
+                        'placeholder': 'Adresse e-mail'
+                    }
+                }) }}
+                {% if form_errors(registrationForm.email) %}
+                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div>
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
+                {{ form_widget(registrationForm.plainPassword, {
+                    'attr': {
+                        'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
+                        'placeholder': 'Mot de passe (minimum 6 caractères)'
+                    }
+                }) }}
+                {% if form_errors(registrationForm.plainPassword) %}
+                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
+                        {{ form_errors(registrationForm.plainPassword) }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="submit"
+                class="w-full text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md focus:ring-4 focus:outline-none focus:ring-primaryLight font-medium rounded-xl text-sm px-5 py-3 text-center transition-all duration-300">
+                Créer mon compte
+            </button>
+
+            <p class="text-sm font-medium text-textSecondary text-center">
+                Déjà un compte ?
+                <a href="{{ path('app_login') }}" class="text-accent hover:underline"> Se connecter</a>
+            </p>
+
+        {{ form_end(registrationForm) }}
+    </div>
+</div>
 {% endblock %}

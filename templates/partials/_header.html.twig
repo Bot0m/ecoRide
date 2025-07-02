@@ -37,7 +37,7 @@
           {% if app.user %}
             <!-- Utilisateur connecté -->
             <div class="px-4 py-3">
-              <span class="block text-body font-base text-tSecondaryDark">{{ app.user.userIdentifier }}</span>
+              <span class="block text-body font-base text-tSecondaryDark">{{ app.user.pseudo }}</span>
               <span class="block text-body font-base text-tSecondaryLight truncate">{{ app.user.email|default('email@ecoride.com') }}</span>
             </div>
             <ul class="py-2" aria-labelledby="user-menu-button">

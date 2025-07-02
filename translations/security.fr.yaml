@@ -1,0 +1,6 @@
+# Messages de sécurité et d'authentification
+"Invalid credentials.": "Identifiants incorrects."
+
+# Messages d'erreur de connexion
+login:
+  error: "Identifiants incorrects. Vérifiez votre email et mot de passe." 

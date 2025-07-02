@@ -1,0 +1,20 @@
+# Messages de validation des formulaires
+"Please enter a password": "Veuillez saisir un mot de passe"
+"Your password should be at least {{ limit }} characters": "Votre mot de passe doit contenir au moins {{ limit }} caractères"
+"You should agree to our terms.": "Vous devez accepter nos conditions d'utilisation."
+"This value should not be blank.": "Ce champ ne peut pas être vide."
+"This value is not a valid email address.": "Veuillez saisir une adresse e-mail valide."
+
+# Messages personnalisés du formulaire d'inscription
+"Veuillez saisir un pseudo": "Veuillez saisir un pseudo"
+"Votre pseudo doit contenir au moins {{ limit }} caractères": "Votre pseudo doit contenir au moins {{ limit }} caractères"
+"Votre pseudo ne peut pas dépasser {{ limit }} caractères": "Votre pseudo ne peut pas dépasser {{ limit }} caractères"
+"Veuillez saisir une adresse e-mail": "Veuillez saisir une adresse e-mail"
+"Veuillez saisir une adresse e-mail valide": "Veuillez saisir une adresse e-mail valide"
+"Vous devez accepter les conditions d'utilisation.": "Vous devez accepter les conditions d'utilisation."
+"Veuillez saisir un mot de passe": "Veuillez saisir un mot de passe"
+"Votre mot de passe doit contenir au moins {{ limit }} caractères": "Votre mot de passe doit contenir au moins {{ limit }} caractères"
+"Votre mot de passe est trop long": "Votre mot de passe est trop long"
+
+# Messages d'erreur Symfony par défaut traduits
+"There is already an account with this email": "Cette adresse e-mail est déjà utilisée" 
