@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    #[Route('/mon-compte', name: 'mon_compte')]
+    #[Route('/credit', name: 'credit')]
     public function index(): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');

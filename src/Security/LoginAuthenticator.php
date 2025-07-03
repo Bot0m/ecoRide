@@ -51,7 +51,7 @@ class LoginAuthenticator extends AbstractLoginFormAuthenticator
     $route = match (true) {
         in_array('ROLE_ADMIN', $user->getRoles()) => 'admin_dashboard',
         in_array('ROLE_EMPLOYE', $user->getRoles()) => 'employe_dashboard',
-        default => 'mon_compte',
+        default => 'credit',
     };
 
     return new RedirectResponse($this->urlGenerator->generate($route));
