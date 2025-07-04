@@ -12,13 +12,13 @@
       <div class="hidden md:flex">
         <ul class="flex font-medium space-x-8 rtl:space-x-reverse">
           <li>
-            <a href="{{ path('homepage') }}#qui-sommes-nous" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accentDark">Qui sommes-nous ?</a>
+            <a href="{{ path('homepage') }}#qui-sommes-nous" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Qui sommes-nous ?</a>
           </li>
           <li>
-            <a href="{{ path('app_rides') }}" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accentDark">Covoiturages</a>
+            <a href="{{ path('app_rides') }}" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Covoiturages</a>
           </li>
           <li>
-            <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accentDark">Contact
+            <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Contact
             </button>
           </li>
         </ul>
@@ -45,34 +45,34 @@
               {# Options spécifiques selon le rôle #}
               {% if is_granted('ROLE_ADMIN') %}
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Administration</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Administration</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Compte employé</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte employé</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Compte utilisateur</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte utilisateur</a>
                 </li>
               {% elseif is_granted('ROLE_EMPLOYE') %}
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Les voyages</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Les voyages</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Avis</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Avis</a>
                 </li>
               {% else %}
                 {# Options pour les utilisateurs standards uniquement #}
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Crédit</a>
+                  <a href="{{ path('credit') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Crédit</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Mes voyages</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes voyages</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Mes véhicules</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
                 </li>
                 <li>
-                  <a href="#" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Mes informations</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
                 </li>
               {% endif %}
               
@@ -81,14 +81,14 @@
               
               {# Déconnexion (pour tous) #}
               <li>
-                <button type="button" onclick="confirmLogout(event)" class="block w-full text-left px-4 py-2 text-body font-base text-textSecondary hover:text-accent bg-transparent border-0 cursor-pointer">Se déconnecter</button>
+                <button type="button" onclick="confirmLogout(event)" class="block w-full text-left px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent bg-transparent border-0 cursor-pointer">Se déconnecter</button>
               </li>
             </ul>
           {% else %}
             <!-- Utilisateur non connecté -->
             <ul class="py-2" aria-labelledby="user-menu-button">
               <li>
-                <a href="{{ path('app_login') }}" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accent ">Connexion</a>
+                <a href="{{ path('app_login') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Connexion</a>
               </li>
             </ul>
           {% endif %}
@@ -106,13 +106,13 @@
   <div class="z-[60] hidden absolute top-16 right-4 text-base list-none backdrop-blur-xl bg-secondary/90 divide-y divide-white/20 rounded-2xl shadow-2xl border border-white/30 md:hidden" id="navbar-user">
           <ul class="py-2">
         <li>
-          <a href="{{ path('homepage') }}#qui-sommes-nous" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accentDark">Qui sommes-nous ?</a>
+          <a href="{{ path('homepage') }}#qui-sommes-nous" class="nav-link block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Qui sommes-nous ?</a>
         </li>
       <li>
-        <a href="{{ path('app_rides') }}" class="block px-4 py-2 text-body font-base text-textSecondary hover:text-accentDark">Covoiturages</a>
+        <a href="{{ path('app_rides') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary hover:text-accent">Covoiturages</a>
       </li>
       <li>
-        <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accentDark">Contact
+        <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary hover:text-accent">Contact
         </button>
       </li>
     </ul>
@@ -201,6 +201,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         lastScrollTop = scrollTop;
+    });
+
+    // Gestion des états actifs pour tous les liens de navigation
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    // Réinitialiser tous les liens
+    navLinks.forEach(link => {
+        link.classList.remove('text-accentDark');
+        link.classList.add('text-textSecondary');
+    });
+    
+    // Mettre en surbrillance le lien actif
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.remove('text-textSecondary');
+            link.classList.add('text-accentDark');
+        }
     });
 });
 </script>

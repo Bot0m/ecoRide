@@ -16,7 +16,7 @@
         {% include 'partials/_header.html.twig' %}
         {% include 'partials/_success_popup.html.twig' %}
 
-        <main class="flex-grow {% if app.request.get('_route') not in ['homepage', 'app_login', 'app_rides', 'app_register'] %}pt-20{% endif %}">
+        <main class="flex-grow {% if app.request.get('_route') not in ['homepage', 'app_login', 'app_rides', 'app_register','credit','user_base'] %}pt-20{% endif %}">
             {% block body %}{% endblock %}
         </main>
 

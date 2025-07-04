@@ -1,0 +1,73 @@
+{% extends 'user/base.html.twig' %}
+
+{% block user_content %}
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/10 to-secondary/20 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-3xl font-bold text-textPrimary mb-2">Bonjour {{ user.pseudo }} ! 👋</h1>
+        <p class="text-lg text-textSecondary">Bienvenue dans votre espace personnel Ecoride</p>
+    </div>
+
+    <!-- Carte des crédits -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-textPrimary">Mes crédits</h2>
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
+            <p class="text-3xl font-bold text-accent mb-4">{{ user.credits }}</p>
+            <p class="text-sm text-textSecondary mb-4">crédits disponibles</p>
+            <a href="#" class="inline-flex items-center bg-accent text-white font-semibold px-6 py-3 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
+                Ajouter des crédits
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Carte activité récente -->
+        <div class="bg-gradient-to-br from-secondary/30 to-secondary/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-textPrimary">Activité récente</h2>
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <p class="text-textSecondary mb-4">Aucun voyage récent</p>
+            <a href="#" class="inline-flex items-center text-accent hover:text-accentDark font-semibold transition-colors duration-300">
+                Voir tous mes voyages
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="bg-gradient-to-r from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+        <h2 class="text-xl font-semibold text-textPrimary mb-6">Actions rapides</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="{{ path('app_rides') }}" class="flex items-center gap-3 p-4 bg-accent/10 hover:bg-accent/20 rounded-lg transition-all duration-300 border border-accent/30 hover:border-accent/50">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="font-semibold text-textPrimary">Rechercher un trajet</span>
+            </a>
+            
+            <a href="#" class="flex items-center gap-3 p-4 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-all duration-300 border border-white/20 hover:border-white/30">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span class="font-semibold text-textPrimary">Proposer un trajet</span>
+            </a>
+            
+            <a href="#" class="flex items-center gap-3 p-4 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-all duration-300 border border-white/20 hover:border-white/30">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="font-semibold text-textPrimary">Modifier mon profil</span>
+            </a>
+        </div>
+    </div>
+{% endblock %}
