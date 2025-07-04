@@ -45,20 +45,20 @@
               {# Options spécifiques selon le rôle #}
               {% if is_granted('ROLE_ADMIN') %}
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Administration</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Administration</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte employé</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte employé</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte utilisateur</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte utilisateur</a>
                 </li>
               {% elseif is_granted('ROLE_EMPLOYE') %}
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Les voyages</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Les voyages</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Avis</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Avis</a>
                 </li>
               {% else %}
                 {# Options pour les utilisateurs standards uniquement #}
@@ -66,13 +66,13 @@
                   <a href="{{ path('credit') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Crédit</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes voyages</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes voyages</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
                 </li>
                 <li>
-                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
+                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
                 </li>
               {% endif %}
               
