@@ -23,6 +23,12 @@ class ContactController extends AbstractController
             $this->addFlash('success', 'Message envoyé !');
         }
 
+        // Rediriger vers la page d'origine ou homepage par défaut
+        $referer = $request->headers->get('referer');
+        if ($referer && $referer !== $request->getUri()) {
+            return $this->redirect($referer);
+        }
+        
         return $this->redirectToRoute('homepage');
     }
 }

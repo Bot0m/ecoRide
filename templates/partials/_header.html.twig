@@ -121,21 +121,19 @@
 </nav>
 
 <!-- Modal de confirmation de déconnexion -->
-<div id="logoutModal" class="fixed inset-0 backdrop-blur-sm bg-gray-600/30 overflow-y-auto h-full w-full z-[70] hidden">
-  <div class="relative top-20 mx-auto p-6 border border-white/30 w-96 shadow-2xl rounded-2xl backdrop-blur-xl bg-secondary/90">
-    <div class="mt-3 text-center">
-      <h3 class="text-lg text-body font-subtitle text-textPrimary">Confirmation de déconnexion</h3>
-      <div class="mt-2 px-7 py-3">
-        <p class="text-sm text-body font-base text-textSecondary">
-          Êtes-vous sûr de vouloir vous déconnecter ?
-        </p>
-      </div>
-      <div class="items-center px-4 py-3">
-        <button id="confirmLogoutBtn" class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent/80 hover:bg-accent backdrop-blur-sm rounded-xl text-sm px-6 py-3 mx-2 transition-all duration-300">
-          Oui
+<div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
+  <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+    <div class="text-center">
+      <h3 class="text-xl font-bold text-backgroundDark mb-2">Déconnexion</h3>
+      <p class="text-background mb-6">
+        Êtes-vous sûr de vouloir vous déconnecter ?
+      </p>
+      <div class="flex gap-4 justify-center">
+        <button id="confirmLogoutBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-semibold py-3 px-6 rounded-xl transition-all duration-300">
+          Oui, me déconnecter
         </button>
-        <button id="cancelLogoutBtn" class="font-body text-base text-textSecondary hover:text-textPrimary bg-secondary/60 hover:bg-secondary backdrop-blur-sm border border-white/30 rounded-xl text-sm px-6 py-3 mx-2 transition-all duration-300">
-          Non
+        <button id="cancelLogoutBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-semibold py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+          Annuler
         </button>
       </div>
     </div>

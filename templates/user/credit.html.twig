@@ -2,7 +2,7 @@
 
 {% block user_content %}
     <!-- En-tête de bienvenue -->
-    <div class="bg-gradient-to-r from-accent/10 to-secondary/20 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
         <h1 class="text-3xl font-bold text-textPrimary mb-2">Bonjour {{ user.pseudo }} ! 👋</h1>
         <p class="text-lg text-textSecondary">Bienvenue dans votre espace personnel Ecoride</p>
     </div>
@@ -18,16 +18,16 @@
             </div>
             <p class="text-3xl font-bold text-accent mb-4">{{ user.credits }}</p>
             <p class="text-sm text-textSecondary mb-4">crédits disponibles</p>
-            <a href="{{ path('app_construction') }}" class="inline-flex items-center bg-accent text-white font-semibold px-6 py-3 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
+            <button onclick="openCreditModal()" class="inline-flex items-center bg-accent text-white font-semibold px-6 py-3 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
                 Ajouter des crédits
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-            </a>
+            </button>
         </div>
 
         <!-- Carte activité récente -->
-        <div class="bg-gradient-to-br from-secondary/30 to-secondary/20 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+        <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-textPrimary">Activité récente</h2>
                 <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,4 +70,124 @@
             </a>
         </div>
     </div>
+
+    <!-- Modal d'ajout de crédits -->
+    <div id="creditModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl font-bold text-backgroundDark mb-2">🎓 Projet Étudiant</h3>
+                <p class="text-background">Dans le cadre de ce projet étudiant, l'ajout de crédits est <strong>gratuit</strong> !</p>
+                <p class="text-sm text-background mt-2">Choisissez le nombre de crédits à ajouter :</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <button onclick="addCredits(10)" class="credit-btn bg-gradient-to-r from-accent to-accent/80 text-textSecondary font-semibold py-4 px-6 rounded-xl hover:from-accentDark hover:to-accent backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    +10 crédits
+                </button>
+                <button onclick="addCredits(15)" class="credit-btn bg-gradient-to-r from-accent to-accent/80 text-textSecondary font-semibold py-4 px-6 rounded-xl hover:from-accentDark hover:to-accent backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    +15 crédits
+                </button>
+                <button onclick="addCredits(20)" class="credit-btn bg-gradient-to-r from-accent to-accent/80 text-textSecondary font-semibold py-4 px-6 rounded-xl hover:from-accentDark hover:to-accent backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    +20 crédits
+                </button>
+                <button onclick="addCredits(30)" class="credit-btn bg-gradient-to-r from-accent to-accent/80 text-textSecondary font-semibold py-4 px-6 rounded-xl hover:from-accentDark hover:to-accent backdrop-blur-sm hover:backdrop-blur-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    +30 crédits
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <button onclick="closeCreditModal()" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-semibold py-2 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de succès -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+            <div class="text-center">
+                <div class="text-6xl mb-4">🎉</div>
+                <h3 class="text-2xl font-bold text-backgroundDark mb-2">Félicitations !</h3>
+                <p id="successMessage" class="text-background mb-6"></p>
+                <p class="text-lg font-semibold text-accent mb-6">
+                    Nouveau solde : <span id="newCreditsDisplay" class="text-2xl"></span> crédits
+                </p>
+                <button onclick="closeSuccessModal()" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textPrimary font-semibold py-3 px-6 rounded-xl transition-all duration-300">
+                    Parfait !
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openCreditModal() {
+            document.getElementById('creditModal').classList.remove('hidden');
+        }
+
+        function closeCreditModal() {
+            document.getElementById('creditModal').classList.add('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            // Recharger la page pour mettre à jour l'affichage des crédits
+            location.reload();
+        }
+
+        async function addCredits(amount) {
+            // Désactiver tous les boutons pendant la requête
+            const buttons = document.querySelectorAll('.credit-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+            });
+
+            try {
+                const response = await fetch('{{ path('credit_add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ credits: amount })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Fermer la modal d'ajout
+                    closeCreditModal();
+                    
+                    // Afficher la modal de succès
+                    document.getElementById('successMessage').textContent = data.message;
+                    document.getElementById('newCreditsDisplay').textContent = data.newCredits;
+                    document.getElementById('successModal').classList.remove('hidden');
+                } else {
+                    alert('Erreur : ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de l\'ajout des crédits');
+            } finally {
+                // Réactiver les boutons
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                });
+            }
+        }
+
+        // Fermer la modal en cliquant en dehors
+        document.getElementById('creditModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreditModal();
+            }
+        });
+
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSuccessModal();
+            }
+        });
+    </script>
 {% endblock %}
