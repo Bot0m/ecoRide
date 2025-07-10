@@ -34,6 +34,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer')]
     private ?int $credits = null;
 
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $bio = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $avatar = null;
+
+    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    private ?string $userType = null;
+
     /**
      * @var Collection<int, Vehicle>
      */
@@ -149,6 +158,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCredits(int $credits): static
     {
         $this->credits = $credits;
+
+        return $this;
+    }
+
+    public function getBio(): ?string
+    {
+        return $this->bio;
+    }
+
+    public function setBio(?string $bio): static
+    {
+        $this->bio = $bio;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getUserType(): ?string
+    {
+        return $this->userType;
+    }
+
+    public function setUserType(?string $userType): static
+    {
+        $this->userType = $userType;
 
         return $this;
     }
@@ -337,6 +382,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getUserRole(): string
+    {
+        // Si un type d'utilisateur a été défini lors de l'inscription, l'utiliser
+        if ($this->userType !== null) {
+            return $this->userType;
+        }
+        
+        // Sinon, utiliser l'ancienne logique pour compatibilité avec les utilisateurs existants
+        $hasVehicles = !$this->vehicles->isEmpty();
+        $hasDrivenRides = !$this->drivenRides->isEmpty();
+        $hasRidesAsPassenger = !$this->ridesAsPassenger->isEmpty();
+        
+        $isDriver = $hasVehicles || $hasDrivenRides;
+        $isPassenger = $hasRidesAsPassenger;
+        
+        if ($isDriver && $isPassenger) {
+            return 'Conducteur et Passager';
+        } elseif ($isDriver) {
+            return 'Conducteur';
+        } elseif ($isPassenger) {
+            return 'Passager';
+        } else {
+            return 'Nouveau membre';
+        }
     }
 
     public function getUserIdentifier(): string

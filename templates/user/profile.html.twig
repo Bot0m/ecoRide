@@ -1,0 +1,476 @@
+{% extends 'user/base.html.twig' %}
+
+{% block user_content %}
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Mes informations</h1>
+        <p class="text-body font-base text-textSecondary">Gérez vos informations personnelles Ecoride</p>
+    </div>
+
+    <!-- Informations principales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Carte Avatar et informations de base -->
+        <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30">
+            <div class="text-center mb-6">
+                <!-- Avatar -->
+                <div class="relative inline-block mb-4">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-br from-accent/30 to-accent/50 flex items-center justify-center text-2xl font-bold text-white mx-auto shadow-lg">
+                        {% if user.avatar %}
+                            <img src="{{ user.avatar }}" alt="Avatar" class="w-24 h-24 rounded-full object-cover">
+                        {% else %}
+                            {{ user.pseudo ? user.pseudo|first|upper : '?' }}
+                        {% endif %}
+                    </div>
+                    <button onclick="openAvatarModal()" class="absolute -bottom-1 -right-1 bg-accent hover:bg-accentDark text-white rounded-full p-2 shadow-lg transition-all duration-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Informations de base -->
+                <h2 class="text-subtitle font-title text-textPrimary mb-2">{{ user.pseudo }}</h2>
+                <p class="text-textSecondary mb-2">{{ user.email }}</p>
+                
+                <div class="flex items-center justify-center mb-4">
+                    <span class="inline-block bg-accent/20 text-accent px-3 py-1 rounded-full text-body font-base">
+                        {{ user.userRole }}
+                    </span>
+                </div>
+                
+                <button onclick="openEditModal()" class="w-full inline-flex items-center justify-center bg-accent text-white font-base px-6 py-2 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
+                    Modifier mes informations
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+
+    <!-- Section Bio -->
+    <div class="bg-gradient-to-r from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-subtitle font-title text-textPrimary">Ma bio</h2>
+            <button onclick="openBioModal()" class="text-accent hover:text-accentDark transition-colors duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="bio-content">
+            {% if user.bio %}
+                <p class="text-textSecondary leading-relaxed">{{ user.bio|nl2br }}</p>
+            {% else %}
+                <p class="text-textSecondary/60 italic cursor-pointer" onclick="openBioModal()">
+                    À remplir - Cliquez ici pour ajouter une bio
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Section Préférences -->
+    <div class="bg-gradient-to-r from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-subtitle font-title text-textPrimary">Mes préférences</h2>
+            <button onclick="openPreferencesModal()" class="text-accent hover:text-accentDark transition-colors duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="preferences-content space-y-3">
+            {% if user.preference %}
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 {% if user.preference.smoker %}text-accent{% else %}text-textSecondary/40{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{% if user.preference.smoker %}5 13l4 4L19 7{% else %}18 6L6 18M6 6l12 12{% endif %}"/>
+                    </svg>
+                    <span class="text-textSecondary">
+                        {% if user.preference.smoker %}Autorise les fumeurs{% else %}N'autorise pas les fumeurs{% endif %}
+                    </span>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <svg class="w-5 h-5 {% if user.preference.animals %}text-accent{% else %}text-textSecondary/40{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{% if user.preference.animals %}5 13l4 4L19 7{% else %}18 6L6 18M6 6l12 12{% endif %}"/>
+                    </svg>
+                    <span class="text-textSecondary">
+                        {% if user.preference.animals %}Autorise les animaux{% else %}N'autorise pas les animaux{% endif %}
+                    </span>
+                </div>
+                
+                {% if user.preference.customPreferences %}
+                    <div class="mt-3 p-3 bg-accent/10 rounded-lg">
+                        <p class="text-textSecondary text-sm font-medium mb-1">Autres préférences :</p>
+                        <p class="text-textSecondary">{{ user.preference.customPreferences|nl2br }}</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p class="text-textSecondary/60 italic cursor-pointer" onclick="openPreferencesModal()">
+                    Aucune préférence définie - Cliquez ici pour configurer vos préférences
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de modification des informations -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-lg mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl text-subtitle font-title text-backgroundDark mb-2">Modifier mes informations</h3>
+                <p class="text-background">Mettez à jour vos informations personnelles :</p>
+            </div>
+            
+            <form id="editForm" class="space-y-4">
+                <div>
+                    <label class="block text-body font-base text-backgroundDark mb-2">Pseudo</label>
+                    <input type="text" id="editPseudo" value="{{ user.pseudo }}" class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-body font-base text-backgroundDark mb-2">Email</label>
+                    <input type="email" id="editEmail" value="{{ user.email }}" class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm">
+                </div>
+                
+                <div>
+                    <label class="block text-body font-base text-backgroundDark mb-2">Je souhaite être</label>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="radio" id="editUserTypePassager" name="userType" value="Passager" 
+                                   {% if user.userType == 'Passager' %}checked{% endif %}
+                                   class="w-4 h-4 text-accent bg-white/20 border-white/30 focus:ring-2">
+                            <label for="editUserTypePassager" class="ml-2 text-backgroundDark font-medium cursor-pointer">
+                                Passager
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="editUserTypeConducteur" name="userType" value="Conducteur" 
+                                   {% if user.userType == 'Conducteur' %}checked{% endif %}
+                                   class="w-4 h-4 text-accent bg-white/20 border-white/30 focus:ring-2">
+                            <label for="editUserTypeConducteur" class="ml-2 text-backgroundDark font-medium cursor-pointer">
+                                Conducteur
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="editUserTypeBoth" name="userType" value="Conducteur et Passager" 
+                                   {% if user.userType == 'Conducteur et Passager' %}checked{% endif %}
+                                   class="w-4 h-4 text-accent bg-white/20 border-white/30 focus:ring-2">
+                            <label for="editUserTypeBoth" class="ml-2 text-backgroundDark font-medium cursor-pointer">
+                                Conducteur et Passager
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="saveProfile()" class="flex-1 bg-accent hover:bg-accentDark text-textPrimary font-base py-2 px-4 rounded-xl transition-all duration-300">
+                        Sauvegarder
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-2 px-4 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de modification de la bio -->
+    <div id="bioModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-lg mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl text-subtitle font-title text-backgroundDark mb-2">Ma bio</h3>
+                <p class="text-background">Partagez quelques mots sur vous :</p>
+            </div>
+            
+            <form id="bioForm" class="space-y-4">
+                <div>
+                    <textarea id="editBio" rows="4" placeholder="Parlez un peu de vous, vos hobbies, pourquoi vous utilisez Ecoride..." class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm resize-none">{{ user.bio }}</textarea>
+                    <p class="text-xs text-background/80 mt-1">Maximum 500 caractères</p>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="saveBio()" class="flex-1 bg-accent hover:bg-accentDark text-textPrimary font-base py-2 px-4 rounded-xl transition-all duration-300">
+                        Sauvegarder
+                    </button>
+                    <button type="button" onclick="closeBioModal()" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-2 px-4 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal d'avatar -->
+    <div id="avatarModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl text-subtitle font-title text-backgroundDark mb-2">Changer d'avatar</h3>
+                <p class="text-background">Importez votre image :</p>
+            </div>
+            
+            <form id="avatarForm" class="space-y-4">
+                <div>
+                    <label class="block text-body font-base text-backgroundDark mb-2">Sélectionner un fichier</label>
+                    <input type="file" id="avatarFile" accept="image/*" class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark focus:outline-none focus:border-accent">
+                    <p class="text-xs text-background/80 mt-1">Formats : JPG, JPEG, PNG, GIF, WebP • Max 20 Mo</p>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="saveAvatar()" class="flex-1 bg-accent hover:bg-accentDark text-textPrimary font-base py-2 px-4 rounded-xl transition-all duration-300">
+                        Sauvegarder
+                    </button>
+                    <button type="button" onclick="closeAvatarModal()" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-2 px-4 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de modification des préférences -->
+    <div id="preferencesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-lg mx-4 transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-2xl text-subtitle font-title text-backgroundDark mb-2">Mes préférences</h3>
+                <p class="text-background">Configurez vos préférences de voyage :</p>
+            </div>
+            
+            <form id="preferencesForm" class="space-y-6">
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="editSmoker" 
+                               {% if user.preference and user.preference.smoker %}checked{% endif %}
+                               class="w-4 h-4 text-accent bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-accent">
+                        <label for="editSmoker" class="text-backgroundDark font-medium cursor-pointer">
+                            J'autorise les fumeurs
+                        </label>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="editAnimals" 
+                               {% if user.preference and user.preference.animals %}checked{% endif %}
+                               class="w-4 h-4 text-accent bg-white/20 border-white/30 rounded focus:ring-2 focus:ring-accent">
+                        <label for="editAnimals" class="text-backgroundDark font-medium cursor-pointer">
+                            J'autorise les animaux
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="editCustomPreferences" class="block text-body font-base text-backgroundDark mb-2">Autres préférences</label>
+                    <textarea id="editCustomPreferences" rows="3" 
+                              placeholder="Décrivez vos autres préférences de voyage..." 
+                              class="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm resize-none">{% if user.preference %}{{ user.preference.customPreferences }}{% endif %}</textarea>
+                    <p class="text-xs text-background/80 mt-1">Maximum 300 caractères</p>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="savePreferences()" class="flex-1 bg-accent hover:bg-accentDark text-textPrimary font-base py-2 px-4 rounded-xl transition-all duration-300">
+                        Sauvegarder
+                    </button>
+                    <button type="button" onclick="closePreferencesModal()" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-2 px-4 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Modals de gestion
+        function openEditModal() {
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function openBioModal() {
+            document.getElementById('bioModal').classList.remove('hidden');
+        }
+
+        function closeBioModal() {
+            document.getElementById('bioModal').classList.add('hidden');
+        }
+
+        function openAvatarModal() {
+            document.getElementById('avatarModal').classList.remove('hidden');
+        }
+
+        function closeAvatarModal() {
+            document.getElementById('avatarModal').classList.add('hidden');
+        }
+
+        function openPreferencesModal() {
+            document.getElementById('preferencesModal').classList.remove('hidden');
+        }
+
+        function closePreferencesModal() {
+            document.getElementById('preferencesModal').classList.add('hidden');
+        }
+
+
+
+        // Fonctions de sauvegarde
+        async function saveProfile() {
+            const pseudo = document.getElementById('editPseudo').value;
+            const email = document.getElementById('editEmail').value;
+            const userType = document.querySelector('input[name="userType"]:checked')?.value;
+
+            if (!userType) {
+                alert('Veuillez sélectionner un type d\'utilisateur');
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ path('profile_update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pseudo, email, userType })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur : ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la mise à jour');
+            }
+        }
+
+        async function saveBio() {
+            const bio = document.getElementById('editBio').value;
+
+            if (bio.length > 500) {
+                alert('La bio ne peut pas dépasser 500 caractères');
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ path('profile_update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ bio })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur : ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la mise à jour');
+            }
+        }
+
+        async function saveAvatar() {
+            const fileInput = document.getElementById('avatarFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Veuillez sélectionner un fichier');
+                return;
+            }
+            
+            // Vérification simple
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Le fichier est trop volumineux (max 5 Mo)');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('avatar', file);
+            
+            try {
+                const response = await fetch('{{ path('profile_upload_avatar') }}', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Recharger la page pour voir le nouvel avatar
+                    location.reload();
+                } else {
+                    console.error('Erreur serveur:', data);
+                    alert('Erreur : ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Erreur réseau/parsing:', error);
+                alert('Erreur de connexion : ' + error.message);
+            }
+        }
+
+        async function savePreferences() {
+            const smoker = document.getElementById('editSmoker').checked;
+            const animals = document.getElementById('editAnimals').checked;
+            const customPreferences = document.getElementById('editCustomPreferences').value;
+
+            if (customPreferences.length > 300) {
+                alert('Les préférences personnalisées ne peuvent pas dépasser 300 caractères');
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ path('profile_preferences_update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ smoker, animals, customPreferences })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur : ' + (data.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la mise à jour');
+            }
+        }
+
+        // Fermer les modals en cliquant en dehors
+        ['editModal', 'bioModal', 'avatarModal', 'preferencesModal'].forEach(modalId => {
+            document.getElementById(modalId).addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+
+        // Limiter la longueur de la bio
+        document.getElementById('editBio').addEventListener('input', function() {
+            const maxLength = 500;
+            if (this.value.length > maxLength) {
+                this.value = this.value.substring(0, maxLength);
+            }
+        });
+
+        // Limiter la longueur des préférences personnalisées
+        document.getElementById('editCustomPreferences').addEventListener('input', function() {
+            const maxLength = 300;
+            if (this.value.length > maxLength) {
+                this.value = this.value.substring(0, maxLength);
+            }
+        });
+    </script>
+{% endblock %} 

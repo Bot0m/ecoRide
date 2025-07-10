@@ -6,9 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
+use App\Entity\Preference;
 
 class UserController extends AbstractController
 {
@@ -49,6 +51,186 @@ class UserController extends AbstractController
             'newCredits' => $newCredits,
             'addedCredits' => $creditsToAdd,
             'message' => "Félicitations ! Vous avez reçu {$creditsToAdd} crédits gratuits."
+        ]);
+    }
+
+    #[Route('/profile', name: 'profile')]
+    public function profile(): Response
+    {
+        $user = $this->getUser();
+        
+        // Si l'utilisateur n'est pas connecté, rediriger vers la page de connexion
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+        
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        return $this->render('user/profile.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/profile/update', name: 'profile_update', methods: ['POST'])]
+    public function updateProfile(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $data = json_decode($request->getContent(), true);
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Mise à jour des informations
+        if (isset($data['pseudo'])) {
+            $user->setPseudo($data['pseudo']);
+        }
+        
+        if (isset($data['email'])) {
+            $user->setEmail($data['email']);
+        }
+        
+        if (isset($data['userType'])) {
+            $user->setUserType($data['userType']);
+        }
+        
+        if (isset($data['bio'])) {
+            $user->setBio($data['bio']);
+        }
+        
+        if (isset($data['avatar'])) {
+            $user->setAvatar($data['avatar']);
+        }
+
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Profil mis à jour avec succès !'
+        ]);
+    }
+
+    #[Route('/profile/upload-avatar', name: 'profile_upload_avatar', methods: ['POST'])]
+    public function uploadAvatar(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            $this->denyAccessUnlessGranted('ROLE_USER');
+
+            $avatarFile = $request->files->get('avatar');
+            
+            if (!$avatarFile) {
+                return new JsonResponse(['error' => 'Aucun fichier sélectionné'], 400);
+            }
+            
+            if (!$avatarFile->isValid()) {
+                return new JsonResponse(['error' => 'Fichier invalide: ' . $avatarFile->getErrorMessage()], 400);
+            }
+
+            // Vérifier le type de fichier
+            $allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic', 'image/heif'];
+            
+            $mimeType = $avatarFile->getMimeType();
+            
+            if (!in_array($mimeType, $allowedMimeTypes)) {
+                return new JsonResponse(['error' => 'Format de fichier non autorisé: ' . $mimeType], 400);
+            }
+
+            // Vérifier la taille (20 Mo max)
+            if ($avatarFile->getSize() > 20 * 1024 * 1024) {
+                return new JsonResponse(['error' => 'Fichier trop volumineux (max 20 Mo)'], 400);
+            }
+
+            /** @var User $user */
+            $user = $this->getUser();
+            
+            // Créer un nom de fichier unique avec extension basée sur le MIME type
+            $extension = match($mimeType) {
+                'image/jpeg', 'image/jpg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/webp' => 'webp',
+                'image/heic' => 'heic',
+                'image/heif' => 'heif',
+                default => 'jpg'
+            };
+            
+            $fileName = 'avatar_' . $user->getId() . '_' . uniqid() . '.' . $extension;
+            
+            // Définir le répertoire de destination
+            $uploadDirectory = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
+            
+            // Créer le répertoire s'il n'existe pas
+            if (!is_dir($uploadDirectory)) {
+                mkdir($uploadDirectory, 0777, true);
+            }
+
+            // Déplacer le fichier
+            $avatarFile->move($uploadDirectory, $fileName);
+            
+            // Supprimer l'ancien avatar s'il existe
+            if ($user->getAvatar() && strpos($user->getAvatar(), '/uploads/avatars/') !== false) {
+                $oldAvatarPath = $this->getParameter('kernel.project_dir') . '/public' . $user->getAvatar();
+                if (file_exists($oldAvatarPath)) {
+                    unlink($oldAvatarPath);
+                }
+            }
+            
+            // Mettre à jour l'avatar dans la base de données
+            $user->setAvatar('/uploads/avatars/' . $fileName);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'success' => true,
+                'avatarUrl' => '/uploads/avatars/' . $fileName
+            ]);
+
+        } catch (FileException $e) {
+            return new JsonResponse([
+                'error' => 'Erreur lors de l\'upload: ' . $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur générale: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    #[Route('/profile/preferences/update', name: 'profile_preferences_update', methods: ['POST'])]
+    public function updatePreferences(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $data = json_decode($request->getContent(), true);
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Récupérer ou créer les préférences
+        $preference = $user->getPreference();
+        if (!$preference) {
+            $preference = new Preference();
+            $user->setPreference($preference);
+        }
+        
+        // Mise à jour des préférences
+        if (isset($data['smoker'])) {
+            $preference->setSmoker((bool)$data['smoker']);
+        }
+        
+        if (isset($data['animals'])) {
+            $preference->setAnimals((bool)$data['animals']);
+        }
+        
+        if (isset($data['customPreferences'])) {
+            $preference->setCustomPreferences($data['customPreferences']);
+        }
+
+        $entityManager->persist($preference);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Préférences mises à jour avec succès !'
         ]);
     }
 }

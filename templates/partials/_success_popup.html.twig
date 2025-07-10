@@ -8,13 +8,18 @@
         </div>
     </div>
     <script>
-        setTimeout(function() {
+        function closeSuccessPopup() {
             const popup = document.querySelector('.success-popup');
             if (popup) {
                 popup.style.opacity = '0';
                 popup.style.transition = 'opacity 0.3s ease-out';
                 setTimeout(() => popup.remove(), 300);
             }
-        }, 4000);
+        }
+        
+        // Auto-fermeture après 5 secondes
+        setTimeout(function() {
+            closeSuccessPopup();
+        }, 5000);
     </script>
 {% endfor %} 

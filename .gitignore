@@ -32,4 +32,4 @@
 # === IDE / OS ===
 .vscode/
 .idea/
-.DS_Store
+.DS_Store/public/uploads/

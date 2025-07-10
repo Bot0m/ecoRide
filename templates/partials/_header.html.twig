@@ -26,12 +26,25 @@
       
       <!-- Menu utilisateur -->
       <div class="flex items-center space-x-3 md:space-x-0 rtl:space-x-reverse">
+        {% if app.user %}
+        <button type="button" class="flex text-sm rounded-full md:me-0 focus:ring-4 focus:ring-accentDark overflow-hidden" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+          <span class="sr-only">Open user menu</span>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-sm font-bold text-white shadow-lg">
+            {% if app.user.avatar %}
+              <img src="{{ app.user.avatar }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+            {% else %}
+              {{ app.user.pseudo ? app.user.pseudo|first|upper : '?' }}
+            {% endif %}
+          </div>
+        </button>
+        {% else %}
         <button type="button" class="flex text-sm bg-secondary rounded-full md:me-0 focus:ring-4 focus:ring-accentDark p-2" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
           <span class="sr-only">Open user menu</span>
           <svg class="w-6 h-6 text-accent" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
           </svg>
         </button>
+        {% endif %}
         <!-- Dropdown menu -->
         <div class="z-[60] hidden my-4 text-base list-none backdrop-blur-xl bg-secondary/90 divide-y divide-white/20 rounded-2xl shadow-2xl border border-white/30" id="user-dropdown">
           {% if app.user %}
@@ -72,7 +85,7 @@
                   <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
                 </li>
                 <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
+                  <a href="{{ path('profile') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
                 </li>
               {% endif %}
               

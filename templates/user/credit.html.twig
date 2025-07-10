@@ -3,7 +3,7 @@
 {% block user_content %}
     <!-- En-tête de bienvenue -->
     <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-        <h1 class="text-3xl font-bold text-textPrimary mb-2">Bonjour {{ user.pseudo }} ! 👋</h1>
+        <h1 class="text-3xl font-bold text-textPrimary mb-2">Bonjour {{ user.pseudo }} ! </h1>
         <p class="text-lg text-textSecondary">Bienvenue dans votre espace personnel Ecoride</p>
     </div>
 
@@ -62,7 +62,7 @@
                 <span class="font-semibold text-textPrimary">Proposer un trajet</span>
             </a>
             
-            <a href="{{ path('app_construction') }}" class="flex items-center gap-3 p-4 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-all duration-300 border border-white/20 hover:border-white/30">
+            <a href="{{ path('profile') }}" class="flex items-center gap-3 p-4 bg-secondary/20 hover:bg-secondary/30 rounded-lg transition-all duration-300 border border-white/20 hover:border-white/30">
                 <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>

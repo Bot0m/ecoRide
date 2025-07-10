@@ -23,18 +23,29 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $plainPassword */
-            $plainPassword = $form->get('plainPassword')->getData();
+            try {
+                /** @var string $plainPassword */
+                $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
-            $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+                // encode the plain password
+                $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+                $entityManager->persist($user);
+                $entityManager->flush();
 
-            // do anything else you need here, like send an email
-
-            return $security->login($user, LoginAuthenticator::class, 'main');
+                // Connexion automatique
+                return $security->login($user, LoginAuthenticator::class, 'main');
+                
+            } catch (\Exception $e) {
+                // Log l'erreur
+                error_log('Erreur inscription: ' . $e->getMessage());
+                
+                // Message d'erreur générique pour l'utilisateur
+                $this->addFlash('error', 'Une erreur est survenue lors de la création de votre compte. Veuillez réessayer.');
+            }
+        } elseif ($form->isSubmitted() && !$form->isValid()) {
+            // Le formulaire a été soumis mais contient des erreurs
+            $this->addFlash('error', 'Veuillez corriger les erreurs ci-dessous.');
         }
 
         return $this->render('registration/register.html.twig', [

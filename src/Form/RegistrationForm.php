@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
@@ -42,6 +43,22 @@ class RegistrationForm extends AbstractType
                     ]),
                     new Email([
                         'message' => 'Veuillez saisir une adresse e-mail valide',
+                    ]),
+                ],
+            ])
+            ->add('userType', ChoiceType::class, [
+                'label' => 'Je suis',
+                'choices' => [
+                    'Passager' => 'Passager',
+                    'Conducteur' => 'Conducteur',
+                    'Passager et Conducteur' => 'Conducteur et Passager',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'data' => 'Passager', // Valeur par défaut
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez choisir votre type d\'utilisation',
                     ]),
                 ],
             ])

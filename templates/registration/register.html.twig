@@ -10,49 +10,70 @@
 
         {{ form_start(registrationForm, {'attr': {'class': 'space-y-4'}}) }}
             
+            {% if form_errors(registrationForm) %}
+                <div class="mb-4 backdrop-blur-sm bg-red-500/20 border border-red-400/30 text-red-800 text-sm rounded-xl p-4 shadow-lg">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="font-medium">{{ form_errors(registrationForm) }}</span>
+                    </div>
+                </div>
+            {% endif %}
+            
             <div>
-                {{ form_label(registrationForm.pseudo, 'Pseudo', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
-                {{ form_widget(registrationForm.pseudo, {
+                {{ form_row(registrationForm.pseudo, {
+                    'label_attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'},
                     'attr': {
                         'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
                         'placeholder': 'Votre pseudo'
                     }
                 }) }}
-                {% if form_errors(registrationForm.pseudo) %}
-                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
-                        {{ form_errors(registrationForm.pseudo) }}
-                    </div>
-                {% endif %}
             </div>
 
             <div>
-                {{ form_label(registrationForm.email, 'Adresse e-mail', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
-                {{ form_widget(registrationForm.email, {
+                {{ form_row(registrationForm.email, {
+                    'label_attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'},
                     'attr': {
                         'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
                         'placeholder': 'Adresse e-mail'
                     }
                 }) }}
-                {% if form_errors(registrationForm.email) %}
-                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
-                        {{ form_errors(registrationForm.email) }}
-                    </div>
-                {% endif %}
             </div>
 
             <div>
-                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'}}) }}
-                {{ form_widget(registrationForm.plainPassword, {
+                {{ form_label(registrationForm.userType, 'Je souhaite être', {'attr': {'class': 'block mb-2 text-sm font-medium text-tSecondaryDark'}}) }}
+                <div class="backdrop-blur-sm bg-background/40 border border-background/30 rounded-xl p-4 space-y-3">
+                    {% for choice in registrationForm.userType %}
+                        <div class="flex items-center">
+                            <input type="radio" 
+                                   id="{{ choice.vars.id }}" 
+                                   name="{{ choice.vars.full_name }}" 
+                                   value="{{ choice.vars.value }}" 
+                                   {% if choice.vars.checked %}checked{% endif %}
+                                   class="w-4 h-4 text-accent bg-background/40 border-background/30 focus:ring-2">
+                            <label for="{{ choice.vars.id }}" class="ml-2 text-sm font-medium text-textSecondary cursor-pointer">
+                                {{ choice.vars.label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if form_errors(registrationForm.userType) %}
+                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
+                        {{ form_errors(registrationForm.userType) }}
+                    </div>
+                {% endif %}
+                {% do registrationForm.userType.setRendered %}
+            </div>
+
+            <div>
+                {{ form_row(registrationForm.plainPassword, {
+                    'label_attr': {'class': 'block mb-1 text-sm font-medium text-tSecondaryDark'},
                     'attr': {
                         'class': 'backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight',
                         'placeholder': 'Mot de passe (minimum 6 caractères)'
                     }
                 }) }}
-                {% if form_errors(registrationForm.plainPassword) %}
-                    <div class="mt-1 text-xs text-red-600 backdrop-blur-sm bg-red-100/60 px-2 py-1 rounded-lg">
-                        {{ form_errors(registrationForm.plainPassword) }}
-                    </div>
-                {% endif %}
             </div>
 
             <button type="submit"
