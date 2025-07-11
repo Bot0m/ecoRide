@@ -28,9 +28,20 @@ class Vehicle
     #[ORM\Column(type: 'string', length: 50)]
     private ?string $energy = null;
 
+    #[ORM\Column(type: 'string', length: 30)]
+    private ?string $color = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $seats = null;
+
     #[ORM\ManyToOne(inversedBy: 'vehicles')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
     public function getPlate(): ?string
     {
@@ -39,7 +50,7 @@ class Vehicle
 
     public function setPlate(string $plate): static
     {
-        $this->plate = $plate;
+        $this->plate = strtoupper($plate);
 
         return $this;
     }
@@ -88,6 +99,30 @@ class Vehicle
     public function setEnergy(string $energy): static
     {
         $this->energy = $energy;
+
+        return $this;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): static
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    public function getSeats(): ?int
+    {
+        return $this->seats;
+    }
+
+    public function setSeats(int $seats): static
+    {
+        $this->seats = $seats;
 
         return $this;
     }

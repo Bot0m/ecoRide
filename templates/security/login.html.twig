@@ -9,39 +9,39 @@
         <h1 class="text-subtitle font-title text-center text-textPrimary mb-6">Connexion</h1>
 
         {% if error %}
-            <div class="mb-4 backdrop-blur-sm bg-red-500/20 border border-red-400/30 text-red-800 text-sm rounded-xl p-4 shadow-lg">
+            <div class="mb-4 backdrop-blur-sm bg-red-500/20 border border-red-400/30 text-red-800 text-body rounded-xl p-4 shadow-lg">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                     </svg>
-                    <span class="font-medium">{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+                    <span class="font-base">{{ error.messageKey|trans(error.messageData, 'security') }}</span>
                 </div>
             </div>
         {% endif %}
 
         <form method="post" class="space-y-4">
             <div>
-                <label for="inputEmail" class="block mb-1 text-sm font-medium text-tSecondaryDark">Adresse e-mail</label>
+                <label for="inputEmail" class="block mb-1 text-body font-base text-tSecondaryDark">Adresse e-mail</label>
                 <input type="email" name="email" placeholder="Adresse e-mail" id="inputEmail" autocomplete="email"
-                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-body rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
                     value="{{ last_username }}" required autofocus>
             </div>
 
             <div>
-                <label for="inputPassword" class="block mb-1 text-sm font-medium text-tSecondaryDark">Mot de passe</label>
+                <label for="inputPassword" class="block mb-1 text-body font-base text-tSecondaryDark">Mot de passe</label>
                 <input type="password" name="password" placeholder="Mot de passe" id="inputPassword" autocomplete="current-password"
-                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-sm rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                    class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-body rounded-xl  focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
                     required>
             </div>
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
             <button type="submit"
-                class="w-full text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md focus:ring-4 focus:outline-none focus:ring-primaryLight font-medium rounded-xl text-sm px-5 py-3 text-center transition-all duration-300">
+                class="w-full text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md focus:ring-4 focus:outline-none focus:ring-primaryLight font-base rounded-xl text-body px-5 py-3 text-center transition-all duration-300">
                 Se connecter
             </button>
 
-            <p class="text-sm font-medium text-textSecondary text-center">
+            <p class="text-body font-base text-textSecondary text-center">
                 Pas encore de compte ?
                 <a href="{{ path('app_register') }}" class="text-accent hover:underline"> Créer un compte</a>
             </p>

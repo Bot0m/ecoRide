@@ -10,12 +10,12 @@
     <div class="flex items-center space-x-4">
       <!-- Navigation desktop -->
       <div class="hidden md:flex">
-        <ul class="flex font-medium space-x-8 rtl:space-x-reverse">
+        <ul class="flex font-base space-x-8 rtl:space-x-reverse">
           <li>
-            <a href="{{ path('homepage') }}#qui-sommes-nous" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Qui sommes-nous ?</a>
+            <a href="{{ path('homepage') }}#qui-sommes-nous" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Qui sommes-nous ?</a>
           </li>
           <li>
-            <a href="{{ path('app_rides') }}" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Covoiturages</a>
+            <a href="{{ path('app_rides') }}" class="nav-link block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Covoiturages</a>
           </li>
           <li>
             <button type="button" data-drawer-target="drawer-contact" data-drawer-show="drawer-contact" aria-controls="drawer-contact" class="block py-2 px-3 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Contact
@@ -27,9 +27,9 @@
       <!-- Menu utilisateur -->
       <div class="flex items-center space-x-3 md:space-x-0 rtl:space-x-reverse">
         {% if app.user %}
-        <button type="button" class="flex text-sm rounded-full md:me-0 focus:ring-4 focus:ring-accentDark overflow-hidden" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+        <button type="button" class="flex text-body rounded-full md:me-0 focus:ring-4 focus:ring-accentDark overflow-hidden" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
           <span class="sr-only">Open user menu</span>
-          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-sm font-bold text-white shadow-lg">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-body font-base text-white shadow-lg">
             {% if app.user.avatar %}
               <img src="{{ app.user.avatar }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
             {% else %}
@@ -38,7 +38,7 @@
           </div>
         </button>
         {% else %}
-        <button type="button" class="flex text-sm bg-secondary rounded-full md:me-0 focus:ring-4 focus:ring-accentDark p-2" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+        <button type="button" class="flex text-body bg-secondary rounded-full md:me-0 focus:ring-4 focus:ring-accentDark p-2" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
           <span class="sr-only">Open user menu</span>
           <svg class="w-6 h-6 text-accent" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
             <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd"/>
@@ -82,7 +82,7 @@
                   <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes voyages</a>
                 </li>
                 <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
+                  <a href="{{ path('app_vehicles') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes véhicules</a>
                 </li>
                 <li>
                   <a href="{{ path('profile') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
@@ -106,7 +106,7 @@
             </ul>
           {% endif %}
         </div>
-        <button data-collapse-toggle="navbar-user" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-accent rounded-lg md:hidden  focus:outline-none " aria-controls="navbar-user" aria-expanded="false">
+        <button data-collapse-toggle="navbar-user" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-body text-accent rounded-lg md:hidden  focus:outline-none " aria-controls="navbar-user" aria-expanded="false">
           <span class="sr-only">Ouvrir le menu</span>
           <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
@@ -137,15 +137,15 @@
 <div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
   <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
     <div class="text-center">
-      <h3 class="text-xl font-bold text-backgroundDark mb-2">Déconnexion</h3>
+      <h3 class="text-subtitle font-title text-backgroundDark mb-2">Déconnexion</h3>
       <p class="text-background mb-6">
         Êtes-vous sûr de vouloir vous déconnecter ?
       </p>
       <div class="flex gap-4 justify-center">
-        <button id="confirmLogoutBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-semibold py-3 px-6 rounded-xl transition-all duration-300">
+        <button id="confirmLogoutBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-base py-3 px-6 rounded-xl transition-all duration-300">
           Oui, me déconnecter
         </button>
-        <button id="cancelLogoutBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-semibold py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+        <button id="cancelLogoutBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
           Annuler
         </button>
       </div>
