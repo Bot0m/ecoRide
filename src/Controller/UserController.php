@@ -11,6 +11,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 use App\Entity\Preference;
+use App\Entity\Ride;
+use App\Form\RideType;
+use App\Repository\RideRepository;
 
 class UserController extends AbstractController
 {
@@ -232,5 +235,81 @@ class UserController extends AbstractController
             'success' => true,
             'message' => 'Préférences mises à jour avec succès !'
         ]);
+    }
+
+    #[Route('/mes-voyages', name: 'app_rides_user', methods: ['GET', 'POST'])]
+    public function userRides(Request $request, RideRepository $rideRepository, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        $user = $this->getUser();
+        
+        // Création du formulaire d'ajout
+        $ride = new Ride();
+        $form = $this->createForm(RideType::class, $ride, ['user' => $user]);
+        $form->handleRequest($request);
+
+        // Traitement de l'ajout si le formulaire est soumis
+        if ($form->isSubmitted() && $form->isValid()) {
+            $ride->setDriver($user);
+            
+            // Déterminer automatiquement si le voyage est écologique basé sur le véhicule
+            $vehicle = $ride->getVehicle();
+            $isEcological = in_array($vehicle->getEnergy(), ['Électrique', 'Hybride']);
+            $ride->setIsEcological($isEcological);
+            
+            $entityManager->persist($ride);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_rides_user');
+        }
+
+        // Récupération des voyages où l'utilisateur est conducteur
+        $drivenRides = $rideRepository->findBy(['driver' => $user]);
+        
+        // Récupération des voyages où l'utilisateur est passager
+        $passengerRides = $user->getRidesAsPassenger()->toArray();
+        
+        // Fusion et tri de tous les voyages de l'utilisateur
+        $allUserRides = array_merge($drivenRides, $passengerRides);
+        
+        // Tri par date
+        usort($allUserRides, function($a, $b) {
+            return $b->getDate() <=> $a->getDate();
+        });
+        
+        // Séparation entre voyages futurs et passés
+        $today = new \DateTime('today');
+        $upcomingRides = [];
+        $pastRides = [];
+        
+        foreach ($allUserRides as $ride) {
+            if ($ride->getDate() >= $today) {
+                $upcomingRides[] = $ride;
+            } else {
+                $pastRides[] = $ride;
+            }
+        }
+
+        return $this->render('user/rides.html.twig', [
+            'upcomingRides' => $upcomingRides,
+            'pastRides' => $pastRides,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/mes-voyages/{id}/supprimer', name: 'app_rides_delete')]
+    public function deleteRide(Ride $ride, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        if ($ride->getDriver() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $entityManager->remove($ride);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_rides_user');
     }
 }

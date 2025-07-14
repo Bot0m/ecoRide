@@ -31,8 +31,8 @@ class Ride
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTime $arrivalTime = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
-    private ?string $price = null;
+    #[ORM\Column(type: 'integer')]
+    private ?int $price = null;
 
     #[ORM\Column(type: 'integer')]
     private ?int $availableSeats = null;
@@ -131,12 +131,12 @@ class Ride
         return $this;
     }
 
-    public function getPrice(): ?string
+    public function getPrice(): ?int
     {
         return $this->price;
     }
 
-    public function setPrice(string $price): static
+    public function setPrice(int $price): static
     {
         $this->price = $price;
 

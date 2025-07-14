@@ -1,0 +1,350 @@
+{% extends 'user/base.html.twig' %}
+
+{% block user_content %}
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Mes voyages</h1>
+    </div>
+
+    <!-- Bouton de proposition -->
+    <div class="mb-8">
+        {% if app.user.vehicles is empty %}
+            <div class="bg-orange-500/20 border border-orange-400/30 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <svg class="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <div>
+                        <p class="text-body text-orange-300">
+                            Vous devez <a href="{{ path('app_vehicles') }}" class="text-accent hover:text-accentDark underline">ajouter un véhicule</a> pour proposer un voyage.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <button onclick="openAddRideModal()" class="inline-flex items-center bg-accent text-textSecondary hover:text-textPrimary font-base px-6 py-3 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Proposer un voyage
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Section des prochains voyages -->
+    <div class="mb-12">
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Mes prochains voyages</h2>
+        
+        {% if upcomingRides is empty %}
+            <div class="bg-gradient-to-br from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-lg font-title text-textSecondary mb-2">Aucun voyage prévu</h3>
+                    <p class="text-textSecondary">
+                        Vous n'avez pas encore de voyage planifié prochainement.
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {% for ride in upcomingRides %}
+                    <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30 hover:border-accent/50 transition-all duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                        {% if ride.isEcological %}
+                                        <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                            🌱 ÉCO
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center gap-4 text-body text-textSecondary">
+                                        <span>{{ ride.date|date('d/m/Y') }}</span>
+                                        <span>{{ ride.departureTime|date('H:i') }}</span>
+                                        {% if ride.driver == app.user %}
+                                            <span class="text-accent text-xs">en tant que conducteur</span>
+                                        {% else %}
+                                            <span class="text-blue-400 text-xs">en tant que passager</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% if ride.driver == app.user %}
+                                <button onclick="confirmDeleteRide({{ ride.id }}, '{{ ride.departure }} → {{ ride.arrival }} ({{ ride.date|date('d/m/Y') }})')" class="text-red-400 hover:text-red-300 transition-colors duration-300 p-2 rounded-lg hover:bg-red-500/10">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Prix par passager</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.price }} crédits</span>
+                            </div>
+                            {% if ride.driver == app.user %}
+                                <div class="flex items-center justify-between">
+                                    <span class="text-body text-textSecondary">Places disponibles</span>
+                                    <span class="text-body font-base text-textPrimary">{{ ride.availableSeats }} places</span>
+                                </div>
+                            {% endif %}
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Véhicule</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Arrivée estimée</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.arrivalTime|date('H:i') }}</span>
+                            </div>
+                            {% if ride.date|date('Y-m-d') == "now"|date('Y-m-d') %}
+                                <div class="flex items-center justify-center">
+                                    <span class="bg-blue-500/20 text-blue-400 text-xs px-3 py-1 rounded-full font-base border border-blue-400/30">
+                                        Aujourd'hui
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Section de l'historique -->
+    <div>
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Mon historique de voyages</h2>
+        
+        {% if pastRides is empty %}
+            <div class="bg-gradient-to-br from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-lg font-title text-textSecondary mb-2">Aucun voyage passé</h3>
+                    <p class="text-textSecondary">
+                        Votre historique de voyages apparaîtra ici une fois que vous aurez effectué vos premiers trajets.
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {% for ride in pastRides %}
+                    <div class="bg-gradient-to-br from-gray-500/20 to-gray-600/10 backdrop-blur-sm rounded-2xl p-6 border border-gray-400/30 hover:border-gray-400/50 transition-all duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                        {% if ride.isEcological %}
+                                        <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                            🌱 ÉCO
+                                        </span>
+                                        {% endif %}
+                                        <span class="bg-gray-500/20 text-gray-400 text-xs px-2 py-1 rounded-full font-base border border-gray-400/30">
+                                            Terminé
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-body text-textSecondary">
+                                        <span>{{ ride.date|date('d/m/Y') }}</span>
+                                        <span>{{ ride.departureTime|date('H:i') }}</span>
+                                        {% if ride.driver == app.user %}
+                                            <span class="text-accent text-xs">en tant que conducteur</span>
+                                        {% else %}
+                                            <span class="text-blue-400 text-xs">en tant que passager</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                                                 <div class="space-y-3">
+                             <div class="flex items-center justify-between">
+                                 <span class="text-body text-textSecondary">Prix par passager</span>
+                                 <span class="text-body font-base text-textPrimary">{{ ride.price }} crédits</span>
+                             </div>
+                             <div class="flex items-center justify-between">
+                                 <span class="text-body text-textSecondary">Véhicule</span>
+                                 <span class="text-body font-base text-textPrimary">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</span>
+                             </div>
+                             <div class="flex items-center justify-between">
+                                 <span class="text-body text-textSecondary">Arrivée</span>
+                                 <span class="text-body font-base text-textPrimary">{{ ride.arrivalTime|date('H:i') }}</span>
+                             </div>
+                         </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block vehicle_modals %}
+    <!-- Modal d'ajout de voyage -->
+    {% if app.user.vehicles is not empty %}
+    <div id="addRideModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all">
+            <div class="text-center mb-6">
+                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Proposer un voyage</h3>
+                <p class="text-background">Remplissez les informations de votre voyage</p>
+            </div>
+            
+            {{ form_start(form, {'attr': {'id': 'addRideForm', 'class': 'space-y-6'}}) }}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_label(form.departure, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.departure) }}
+                        {{ form_errors(form.departure) }}
+                    </div>
+                    
+                    <div>
+                        {{ form_label(form.arrival, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.arrival) }}
+                        {{ form_errors(form.arrival) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.date, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.date) }}
+                        {{ form_errors(form.date) }}
+                    </div>
+                    
+                    <div>
+                        {{ form_label(form.departureTime, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.departureTime) }}
+                        {{ form_errors(form.departureTime) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.arrivalTime, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.arrivalTime) }}
+                        {{ form_errors(form.arrivalTime) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.price, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.price) }}
+                        {{ form_errors(form.price) }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        {{ form_label(form.availableSeats, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.availableSeats) }}
+                        {{ form_errors(form.availableSeats) }}
+                        <p class="text-xs text-background/80 mt-1">Nombre de passagers (hors conducteur)</p>
+                    </div>
+
+                    <div>
+                        {{ form_label(form.vehicle, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.vehicle) }}
+                        {{ form_errors(form.vehicle) }}
+                    </div>
+                </div>
+
+                <!-- Info sur l'utilisation -->
+                <div class="bg-accent/20 border border-accent/40 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-backgroundDark mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <h4 class="font-base text-backgroundDark mb-1">À savoir</h4>
+                            <p class="text-body text-background mb-2">
+                                • Une fois publié, les autres utilisateurs pourront réserver des places<br>
+                                • Les passagers paient en crédits (la plateforme prélève 2 crédits par transaction)<br>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 justify-end">
+                    <button type="button" onclick="closeAddRideModal()" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                    {{ form_widget(form.submit) }}
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modal de confirmation de suppression -->
+    <div id="deleteRideModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+            <div class="text-center">
+                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Supprimer le voyage</h3>
+                <p class="text-background mb-6" id="deleteRideText">
+                    Êtes-vous sûr de vouloir supprimer ce voyage ?
+                </p>
+                <div class="flex gap-4 justify-center">
+                    <button id="confirmDeleteRideBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-6 rounded-xl transition-all duration-300">
+                        Oui, supprimer
+                    </button>
+                    <button id="cancelDeleteRideBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let rideToDelete = null;
+
+        function openAddRideModal() {
+            document.getElementById('addRideModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddRideModal() {
+            document.getElementById('addRideModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function confirmDeleteRide(rideId, rideName) {
+            rideToDelete = rideId;
+            document.getElementById('deleteRideText').textContent = 
+                `Êtes-vous sûr de vouloir supprimer le voyage "${rideName}" ?`;
+            document.getElementById('deleteRideModal').classList.remove('hidden');
+        }
+
+        document.getElementById('confirmDeleteRideBtn').addEventListener('click', function() {
+            if (rideToDelete) {
+                window.location.href = `{{ path('app_rides_delete', {'id': '__ID__'}) }}`.replace('__ID__', rideToDelete);
+            }
+        });
+
+        document.getElementById('cancelDeleteRideBtn').addEventListener('click', function() {
+            document.getElementById('deleteRideModal').classList.add('hidden');
+            rideToDelete = null;
+        });
+
+        // Fermer les modals en cliquant en dehors
+        {% if app.user.vehicles is not empty %}
+        document.getElementById('addRideModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeAddRideModal();
+            }
+        });
+        {% endif %}
+
+        document.getElementById('deleteRideModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                document.getElementById('deleteRideModal').classList.add('hidden');
+                rideToDelete = null;
+            }
+        });
+
+        // Fermer avec la touche Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                {% if app.user.vehicles is not empty %}
+                closeAddRideModal();
+                {% endif %}
+                document.getElementById('deleteRideModal').classList.add('hidden');
+                rideToDelete = null;
+            }
+        });
+    </script>
+{% endblock %} 
