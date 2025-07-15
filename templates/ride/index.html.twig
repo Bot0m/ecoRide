@@ -13,6 +13,10 @@
                 <h1 class="text-2xl font-title text-textPrimary mb-6">Rechercher un covoiturage</h1>
                 
                 <form method="get" action="{{ path('app_rides') }}" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                    <!-- Champs cachés pour les filtres -->
+                    <input type="hidden" name="max_price" id="max_price_hidden" value="{{ search.max_price ?? '' }}">
+                    <input type="hidden" name="ecological_only" id="ecological_only_hidden" value="{{ search.ecological_only ?? '' }}">
+                    <input type="hidden" name="max_duration" id="max_duration_hidden" value="{{ search.max_duration ?? '' }}">
                     <div class="relative">
                         <input
                             type="text"
@@ -62,6 +66,12 @@
                         </button>
                     </div>
 
+                    <button type="button" id="filterBtn" class="font-body text-base text-textSecondary hover:text-textPrimary bg-background hover:bg-backgroundDark border border-accent rounded-lg text-body px-4 py-2 transition-all duration-300 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+                        </svg>
+                        Filtres
+                    </button>
                     <button type="submit" class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark rounded-lg text-body px-4 py-2 transition-all duration-300">
                         Rechercher
                     </button>
@@ -415,6 +425,61 @@
     </div>
 </div>
 
+<!-- Modal des filtres -->
+<div id="filterModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
+    <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+        <div class="w-full">
+            <div class="text-center mb-6">
+                <div class="mb-4">
+                    <svg class="w-16 h-16 text-accent mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+                    </svg>
+                </div>
+                <h3 class="text-subtitle font-title text-textPrimary mb-2">Filtres de recherche</h3>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Prix maximum -->
+                <div>
+                    <label for="filter_max_price" class="block text-textPrimary font-base mb-2">Prix maximum (crédits) :</label>
+                    <input type="number" id="filter_max_price" min="0" step="1" 
+                           class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-body rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                           placeholder="Aucune limite">
+                </div>
+                
+                <!-- Label écologique -->
+                <div>
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" id="filter_ecological" 
+                               class="w-4 h-4 text-accent bg-background/40 border-background/30 rounded focus:ring-2">
+                        <span class="text-textPrimary font-base">Trajets écologiques uniquement 🌱</span>
+                    </label>
+                </div>
+                
+                <!-- Durée maximum -->
+                <div>
+                    <label for="filter_max_duration" class="block text-textPrimary font-base mb-2">Durée maximum (heures) :</label>
+                    <input type="number" id="filter_max_duration" min="0" max="24" step="0.5" 
+                           class="backdrop-blur-sm bg-background/40 border border-background/30 text-textSecondary text-body rounded-xl focus:border-accent focus:bg-background/60 block w-full p-3 placeholder-tSecondaryLight"
+                           placeholder="Aucune limite (max 24h)">
+                </div>
+            </div>
+            <br>
+            <button id="clearFiltersBtn" class=" text-accent hover:text-accentDark font-base  ">
+                    Réinitialiser
+            </button>
+            <div class="flex gap-4 justify-center mt-8">
+                <button id="applyFiltersBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-base py-3 px-6 rounded-xl transition-all duration-300">
+                    Appliquer les filtres
+                </button>
+                <button id="cancelFiltersBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ importmap('city-autocomplete') }}
 
 <script>
@@ -422,6 +487,9 @@ var currentRideId = null;
 
 // Initialiser l'autocomplétion quand le DOM est chargé
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les filtres depuis l'URL au chargement de la page
+    initializeFiltersFromURL();
+    
     if (typeof CityAutocomplete !== 'undefined') {
         const departureAutocomplete = new CityAutocomplete('departure', 'departure-suggestions');
         const arrivalAutocomplete = new CityAutocomplete('arrival', 'arrival-suggestions');
@@ -456,6 +524,18 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(document.getElementById('arrival-suggestions'), { attributes: true });
     }
 });
+
+function initializeFiltersFromURL() {
+    // Initialiser les champs cachés avec les valeurs de l'URL dès le chargement
+    const urlParams = new URLSearchParams(window.location.search);
+    const maxPrice = urlParams.get('max_price');
+    const ecologicalOnly = urlParams.get('ecological_only');
+    const maxDuration = urlParams.get('max_duration');
+    
+    if (maxPrice) document.getElementById('max_price_hidden').value = maxPrice;
+    if (ecologicalOnly) document.getElementById('ecological_only_hidden').value = ecologicalOnly;
+    if (maxDuration) document.getElementById('max_duration_hidden').value = maxDuration;
+}
 
 function reserveRide(rideId) {
     currentRideId = rideId;
@@ -511,6 +591,69 @@ document.getElementById('confirmReservationBtn').addEventListener('click', confi
 document.getElementById('cancelReservationBtn').addEventListener('click', function() {
     document.getElementById('reservationModal').classList.add('hidden');
 });
+
+// Gestion du modal des filtres
+document.getElementById('filterBtn').addEventListener('click', function() {
+    // Charger les valeurs existantes dans le modal
+    loadFiltersFromForm();
+    document.getElementById('filterModal').classList.remove('hidden');
+});
+
+document.getElementById('cancelFiltersBtn').addEventListener('click', function() {
+    document.getElementById('filterModal').classList.add('hidden');
+});
+
+document.getElementById('applyFiltersBtn').addEventListener('click', function() {
+    // Appliquer les filtres au formulaire principal
+    applyFiltersToForm();
+    document.getElementById('filterModal').classList.add('hidden');
+    // Soumettre automatiquement le formulaire
+    document.querySelector('form').submit();
+});
+
+document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+    // Effacer tous les filtres
+    document.getElementById('filter_max_price').value = '';
+    document.getElementById('filter_ecological').checked = false;
+    document.getElementById('filter_max_duration').value = '';
+    
+    // Effacer aussi les champs cachés
+    document.getElementById('max_price_hidden').value = '';
+    document.getElementById('ecological_only_hidden').value = '';
+    document.getElementById('max_duration_hidden').value = '';
+    
+    // Fermer le modal et soumettre
+    document.getElementById('filterModal').classList.add('hidden');
+    document.querySelector('form').submit();
+});
+
+function loadFiltersFromForm() {
+    // Récupérer les valeurs depuis l'URL pour garantir la persistance
+    const urlParams = new URLSearchParams(window.location.search);
+    const maxPrice = urlParams.get('max_price') || document.getElementById('max_price_hidden').value;
+    const ecologicalOnly = urlParams.get('ecological_only') || document.getElementById('ecological_only_hidden').value;
+    const maxDuration = urlParams.get('max_duration') || document.getElementById('max_duration_hidden').value;
+    
+    document.getElementById('filter_max_price').value = maxPrice || '';
+    document.getElementById('filter_ecological').checked = ecologicalOnly === '1' || ecologicalOnly === 'true';
+    document.getElementById('filter_max_duration').value = maxDuration || '';
+    
+    // Mettre à jour aussi les champs cachés pour la cohérence
+    document.getElementById('max_price_hidden').value = maxPrice || '';
+    document.getElementById('ecological_only_hidden').value = ecologicalOnly || '';
+    document.getElementById('max_duration_hidden').value = maxDuration || '';
+}
+
+function applyFiltersToForm() {
+    // Appliquer les valeurs du modal vers les champs cachés
+    const maxPrice = document.getElementById('filter_max_price').value;
+    const ecologicalOnly = document.getElementById('filter_ecological').checked;
+    const maxDuration = document.getElementById('filter_max_duration').value;
+    
+    document.getElementById('max_price_hidden').value = maxPrice || '';
+    document.getElementById('ecological_only_hidden').value = ecologicalOnly ? '1' : '';
+    document.getElementById('max_duration_hidden').value = maxDuration || '';
+}
 
 function showSuccessPopup() {
     // Créer le pop-up de succès

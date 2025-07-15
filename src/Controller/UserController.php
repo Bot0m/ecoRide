@@ -269,15 +269,33 @@ class UserController extends AbstractController
         // Récupération des voyages où l'utilisateur est conducteur
         $drivenRides = $rideRepository->findBy(['driver' => $user]);
         
-        // Récupération des voyages où l'utilisateur est passager
-        $passengerRides = $user->getRidesAsPassenger()->toArray();
+        // Récupération des voyages où l'utilisateur est passager (via participations acceptées)
+        $passengerRides = [];
+        foreach ($user->getParticipations() as $participation) {
+            if ($participation->getStatus() === 'acceptee') {
+                $passengerRides[] = $participation->getRide();
+            }
+        }
         
         // Fusion et tri de tous les voyages de l'utilisateur
         $allUserRides = array_merge($drivenRides, $passengerRides);
         
-        // Tri par date
+        // Tri par date et heure (du plus proche au plus éloigné)
         usort($allUserRides, function($a, $b) {
-            return $b->getDate() <=> $a->getDate();
+            // Créer des DateTime complets avec date et heure de départ
+            $dateTimeA = clone $a->getDate();
+            $dateTimeA->setTime(
+                $a->getDepartureTime()->format('H'),
+                $a->getDepartureTime()->format('i')
+            );
+            
+            $dateTimeB = clone $b->getDate();
+            $dateTimeB->setTime(
+                $b->getDepartureTime()->format('H'),
+                $b->getDepartureTime()->format('i')
+            );
+            
+            return $dateTimeA <=> $dateTimeB;
         });
         
         // Séparation entre voyages futurs et passés
