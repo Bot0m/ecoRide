@@ -31,11 +31,53 @@ class RideRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findMatchingRidesWithFallback(string $departure, string $arrival, \DateTimeInterface $date): array
+    {
+        // Rechercher d'abord pour la date exacte
+        $exactResults = $this->findMatchingRides($departure, $arrival, $date);
+        
+        if (!empty($exactResults)) {
+            return [
+                'rides' => $exactResults,
+                'isAlternative' => false,
+                'searchedDate' => $date
+            ];
+        }
+        
+        // Si aucun résultat pour la date exacte, chercher les 7 jours suivants
+        $startDate = (new \DateTimeImmutable($date->format('Y-m-d')))->modify('+1 day');
+        $endDate = (new \DateTimeImmutable($date->format('Y-m-d')))->modify('+7 days');
+        
+        $alternativeResults = $this->createQueryBuilder('r')
+            ->where('r.departure LIKE :departure')
+            ->andWhere('r.arrival LIKE :arrival')
+            ->andWhere('r.date >= :startDate AND r.date <= :endDate')
+            ->setParameter('departure', '%' . $departure . '%')
+            ->setParameter('arrival', '%' . $arrival . '%')
+            ->setParameter('startDate', $startDate->format('Y-m-d'))
+            ->setParameter('endDate', $endDate->format('Y-m-d'))
+            ->orderBy('r.date', 'ASC')
+            ->addOrderBy('r.departureTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+        
+        return [
+            'rides' => $alternativeResults,
+            'isAlternative' => !empty($alternativeResults),
+            'searchedDate' => $date
+        ];
+    }
+
     public function findUpcomingRides(): array
     {
+        $now = new \DateTimeImmutable();
+        $today = new \DateTimeImmutable('today');
+        $currentTime = $now->format('H:i:s');
+        
         return $this->createQueryBuilder('r')
-            ->where('r.date > :now')
-            ->setParameter('now', new \DateTimeImmutable('today'))
+            ->where('r.date > :today OR (r.date = :today AND r.departureTime > :currentTime)')
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('currentTime', $currentTime)
             ->orderBy('r.date', 'ASC')
             ->addOrderBy('r.departureTime', 'ASC')
             ->getQuery()

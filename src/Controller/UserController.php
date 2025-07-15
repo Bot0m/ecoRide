@@ -12,8 +12,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 use App\Entity\Preference;
 use App\Entity\Ride;
+use App\Entity\Participation;
 use App\Form\RideType;
 use App\Repository\RideRepository;
+use App\Repository\ParticipationRepository;
 
 class UserController extends AbstractController
 {
@@ -311,5 +313,92 @@ class UserController extends AbstractController
         $entityManager->flush();
 
         return $this->redirectToRoute('app_rides_user');
+    }
+
+    #[Route('/participations/{id}/accepter', name: 'app_participation_accept', methods: ['POST'])]
+    public function acceptParticipation(Participation $participation, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est le conducteur du trajet
+        if ($participation->getRide()->getDriver() !== $user) {
+            return new JsonResponse(['error' => 'Vous n\'êtes pas autorisé à modifier cette participation'], 403);
+        }
+        
+        // Vérifier que la participation est en attente
+        if ($participation->getStatus() !== 'en_attente') {
+            return new JsonResponse(['error' => 'Cette demande a déjà été traitée'], 400);
+        }
+        
+        try {
+            // Changer le statut de la participation
+            $participation->setStatus('acceptee');
+            
+            // Ajouter l'utilisateur comme passager du trajet
+            $ride = $participation->getRide();
+            $passenger = $participation->getUser();
+            $ride->addPassenger($passenger);
+            
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Demande acceptée avec succès ! Le passager a été ajouté à votre trajet.'
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Erreur lors de l\'acceptation : ' . $e->getMessage()], 500);
+        }
+    }
+
+    #[Route('/participations/{id}/refuser', name: 'app_participation_refuse', methods: ['POST'])]
+    public function refuseParticipation(Participation $participation, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est le conducteur du trajet
+        if ($participation->getRide()->getDriver() !== $user) {
+            return new JsonResponse(['error' => 'Vous n\'êtes pas autorisé à modifier cette participation'], 403);
+        }
+        
+        // Vérifier que la participation est en attente
+        if ($participation->getStatus() !== 'en_attente') {
+            return new JsonResponse(['error' => 'Cette demande a déjà été traitée'], 400);
+        }
+        
+        try {
+            // Changer le statut de la participation
+            $participation->setStatus('refusee');
+            
+            // Rembourser l'utilisateur (prix + commission)
+            $ride = $participation->getRide();
+            $passenger = $participation->getUser();
+            $refundAmount = $ride->getPrice() + 2; // Prix + commission
+            
+            $passenger->setCredits($passenger->getCredits() + $refundAmount);
+            
+            // Débiter le conducteur du prix qu'il avait reçu
+            $driver = $ride->getDriver();
+            $driver->setCredits($driver->getCredits() - $ride->getPrice());
+            
+            // Remettre une place disponible
+            $ride->setAvailableSeats($ride->getAvailableSeats() + 1);
+            
+            $entityManager->flush();
+            
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Demande refusée. Le passager a été remboursé de ses crédits.'
+            ]);
+            
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Erreur lors du refus : ' . $e->getMessage()], 500);
+        }
     }
 }

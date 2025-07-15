@@ -3,30 +3,38 @@
 {% block title %}Covoiturages - Ecoride{% endblock %}
 
 {% block body %}
-<div class="h-screen pt-20 flex items-center justify-center bg-[url('/images/pexels-lkloeppel-577696.jpg')] bg-cover bg-center bg-no-repeat px-4">
+<div class="min-h-screen pt-20 bg-[url('/images/pexels-lkloeppel-577696.jpg')] bg-cover bg-center bg-no-repeat px-4">
     
     <!-- Hero avec formulaire de recherche -->
-    <section class="h-screen flex items-start justify-center pt-48">
+    <section class="flex items-start justify-center pt-48 pb-16">
         <div class="text-center px-4">
             <!-- Carte glassmorphique horizontale -->
             <div class="w-full max-w-6xl backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 mb-4">
                 <h1 class="text-2xl font-title text-textPrimary mb-6">Rechercher un covoiturage</h1>
                 
                 <form method="get" action="{{ path('app_rides') }}" class="flex flex-wrap justify-center gap-2 md:gap-4">
-                    <input
-                        type="text"
-                        name="departure"
-                        placeholder="Ville de départ"
-                        value="{{ search.departure ?? '' }}"
-                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
-                    />
-                    <input
-                        type="text"
-                        name="arrival"
-                        placeholder="Ville d'arrivée"
-                        value="{{ search.arrival ?? '' }}"
-                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
-                    />
+                    <div class="relative">
+                        <input
+                            type="text"
+                            name="departure"
+                            id="departure"
+                            placeholder="Ville de départ"
+                            value="{{ search.departure ?? '' }}"
+                            autocomplete="off"
+                            class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                        />
+                    </div>
+                    <div class="relative">
+                        <input
+                            type="text"
+                            name="arrival"
+                            id="arrival"
+                            placeholder="Ville d'arrivée"
+                            value="{{ search.arrival ?? '' }}"
+                            autocomplete="off"
+                            class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                        />
+                    </div>
                     
                     <div class="relative max-w-sm">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -35,12 +43,11 @@
                             </svg>
                         </div>
                         <input name="date" type="date" 
-                            value="{{ search.date ?? '' }}"
+                            value="{{ search.date ?? 'now'|date('Y-m-d') }}"
                             class="font-body text-secondary bg-backgroundDark border border-accentDark text-textPrimary placeholder-tSecondaryLight text-body rounded-lg block w-full ps-10 p-2.5 focus:border-accentDark" 
                             placeholder="Date de départ">
                     </div>
 
-                    <form class="max-w-xs mx-auto">
                     <div class="relative flex items-center max-w-[8rem]">
                         <button type="button" id="decrement-button" data-input-counter-decrement="quantity-input" class="group bg-background hover:bg-backgroundDark border border-accentDark rounded-s-lg p-3 h-11">
                             <svg class="w-3 h-3 text-tSecondaryLight group-hover:text-textPrimary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
@@ -60,9 +67,481 @@
                     </button>
                 </form>
             </div>
+            <!-- Suggestions d'autocomplétion sorties du conteneur glassmorphique -->
+            <div id="departure-suggestions" class="absolute bg-backgroundDark border border-accentDark rounded-lg mt-1 max-h-60 overflow-y-auto z-[100] hidden shadow-xl"></div>
+            <div id="arrival-suggestions" class="absolute bg-backgroundDark border border-accentDark rounded-lg mt-1 max-h-60 overflow-y-auto z-[100] hidden shadow-xl"></div>
         </div>
     </section>
 
+    <!-- Section des résultats -->
+    <section class="max-w-6xl mx-auto px-4 pb-20">
+        <!-- Résultats de recherche -->
+        {% if ridesMatchingSearch is not empty %}
+            <div class="mb-12">
+                <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6">
+                    {% if searchResult.isAlternative %}
+                        <div class="bg-accent bg-opacity-20 border border-accent/30 rounded-lg p-4 mb-6">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-accent mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="text-left">
+                                    <p class="text-accent text-sm">
+                                        Aucun trajet trouvé pour le {{ searchResult.searchedDate|date('d/m/Y') }}.<br>
+                                        <span class="text-xs opacity-80">Voici les trajets disponibles dans les jours suivants :</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="text-xl font-title text-textPrimary mb-6">
+                            Trajets alternatifs ({{ ridesMatchingSearch|length }} trajet{{ ridesMatchingSearch|length > 1 ? 's' : '' }})
+                        </h2>
+                    {% else %}
+                        <h2 class="text-xl font-title text-textPrimary mb-6">
+                            Résultats de votre recherche ({{ ridesMatchingSearch|length }} trajet{{ ridesMatchingSearch|length > 1 ? 's' : '' }})
+                        </h2>
+                    {% endif %}
+                    
+                    <div class="grid gap-4">
+                        {% for ride in ridesMatchingSearch %}
+                            <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-white/30 hover:border-accent/50 transition-all duration-300">
+                                <!-- En-tête responsive -->
+                                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                                    <!-- Contenu principal -->
+                                    <div class="flex-1 min-w-0">
+                                        <!-- Titre et badge écologique -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+                                            <h3 class="text-base sm:text-lg font-title text-textPrimary break-words">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                            {% if ride.isEcological %}
+                                                <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30 w-fit">
+                                                    🌱 ÉCO
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Grille d'informations responsive -->
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm mb-4">
+                                            <div>
+                                                <span class="text-textSecondary block">Date</span>
+                                                <p class="text-textPrimary font-base">{{ ride.date|date('d/m/Y') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Départ</span>
+                                                <p class="text-textPrimary font-base">{{ ride.departureTime|date('H:i') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Arrivée</span>
+                                                <p class="text-textPrimary font-base">{{ ride.arrivalTime|date('H:i') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Prix</span>
+                                                <p class="text-textPrimary font-base">{{ ride.price }} crédits</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Informations secondaires responsive -->
+                                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                </svg>
+                                                <span class="text-textSecondary truncate">{{ ride.driver.pseudo }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                                                    <circle cx="7" cy="17" r="2"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6"/>
+                                                    <circle cx="17" cy="17" r="2"/>
+                                                </svg>
+                                                <span class="text-textSecondary truncate">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                </svg>
+                                                <span class="text-textSecondary">{{ ride.availableSeats }} place{{ ride.availableSeats > 1 ? 's' : '' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Boutons d'action responsive -->
+                                    <div class="flex-shrink-0 w-full lg:w-auto">
+                                        {% if app.user and ride.driver != app.user %}
+                                            {% set userParticipationStatus = userParticipations[ride.id] ?? null %}
+                                            {% if userParticipationStatus == 'en_attente' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accentDark">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">En attente</span>
+                                                </span>
+                                            {% elseif userParticipationStatus == 'acceptee' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accent">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">Réservé</span>
+                                                </span>
+                                            {% elseif userParticipationStatus == 'refusee' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-red-500">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">Refusée</span>
+                                                </span>
+                                            {% else %}
+                                                {% if ride.availableSeats > 0 %}
+                                                    <button onclick="reserveRide({{ ride.id }})" 
+                                                        data-ride-departure="{{ ride.departure }}"
+                                                        data-ride-arrival="{{ ride.arrival }}"
+                                                        data-ride-date="{{ ride.date|date('d/m/Y') }}"
+                                                        data-ride-time="{{ ride.departureTime|date('H:i') }}"
+                                                        data-ride-price="{{ ride.price }}"
+                                                        data-ride-available-seats="{{ ride.availableSeats }}"
+                                                        class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                                        Réserver
+                                                    </button>
+                                                {% else %}
+                                                    <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center ring-2 ring-backgroundDark">
+                                                        Complet
+                                                    </span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% elseif ride.driver == app.user %}
+                                            <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center">
+                                                Votre trajet
+                                            </span>
+                                        {% else %}
+                                            {% if ride.availableSeats > 0 %}
+                                                <a href="{{ path('app_login') }}" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto text-center block">
+                                                    Se connecter
+                                                </a>
+                                            {% else %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center ring-2 ring-backgroundDark">
+                                                    Complet
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% elseif search.departure or search.arrival or search.date %}
+            <div class="mb-12">
+                <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 text-center">
+                    <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <h2 class="text-xl font-title text-textPrimary mb-2">Aucun trajet trouvé</h2>
+                    <p class="text-textSecondary">Aucun covoiturage ne correspond à vos critères de recherche pour cette période.</p>
+                    <p class="text-textSecondary text-sm mt-2 opacity-80">Essayez de modifier vos critères ou consultez les prochains covoiturages ci-dessous.</p>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Trajets à venir (si pas de recherche active) -->
+        {% if ridesUpcoming is not empty and not (search.departure or search.arrival or search.date) %}
+            <div>
+                <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6">
+                    <h2 class="text-xl font-title text-textPrimary mb-6">
+                        Prochains covoiturages ({{ ridesUpcoming|length }} trajet{{ ridesUpcoming|length > 1 ? 's' : '' }})
+                    </h2>
+                    
+                    <div class="grid gap-4">
+                        {% for ride in ridesUpcoming %}
+                            <div class="bg-white/20 backdrop-blur-sm rounded-xl p-4 md:p-6 border border-white/30 hover:border-accent/50 transition-all duration-300">
+                                <!-- En-tête responsive -->
+                                <div class="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                                    <!-- Contenu principal -->
+                                    <div class="flex-1 min-w-0">
+                                        <!-- Titre et badge écologique -->
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-4">
+                                            <h3 class="text-base sm:text-lg font-title text-textPrimary break-words">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                            {% if ride.isEcological %}
+                                                <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30 w-fit">
+                                                    🌱 ÉCO
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Grille d'informations responsive -->
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-sm mb-4">
+                                            <div>
+                                                <span class="text-textSecondary block">Date</span>
+                                                <p class="text-textPrimary font-base">{{ ride.date|date('d/m/Y') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Départ</span>
+                                                <p class="text-textPrimary font-base">{{ ride.departureTime|date('H:i') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Arrivée</span>
+                                                <p class="text-textPrimary font-base">{{ ride.arrivalTime|date('H:i') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="text-textSecondary block">Prix</span>
+                                                <p class="text-textPrimary font-base">{{ ride.price }} crédits</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Informations secondaires responsive -->
+                                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                </svg>
+                                                <span class="text-textSecondary truncate">{{ ride.driver.pseudo }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+                                                    <circle cx="7" cy="17" r="2"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6"/>
+                                                    <circle cx="17" cy="17" r="2"/>
+                                                </svg>
+                                                <span class="text-textSecondary truncate">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <svg class="w-4 h-4 text-textSecondary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                                </svg>
+                                                <span class="text-textSecondary">{{ ride.availableSeats }} place{{ ride.availableSeats > 1 ? 's' : '' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Boutons d'action responsive -->
+                                    <div class="flex-shrink-0 w-full lg:w-auto">
+                                        {% if app.user and ride.driver != app.user %}
+                                            {% set userParticipationStatus = userParticipations[ride.id] ?? null %}
+                                            {% if userParticipationStatus == 'en_attente' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accentDark">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">En attente</span>
+                                                </span>
+                                            {% elseif userParticipationStatus == 'acceptee' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accent">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">Réservé</span>
+                                                </span>
+                                            {% elseif userParticipationStatus == 'refusee' %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-red-500">
+                                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                    <span class="whitespace-nowrap">Refusée</span>
+                                                </span>
+                                            {% else %}
+                                                {% if ride.availableSeats > 0 %}
+                                                    <button onclick="reserveRide({{ ride.id }})" 
+                                                        data-ride-departure="{{ ride.departure }}"
+                                                        data-ride-arrival="{{ ride.arrival }}"
+                                                        data-ride-date="{{ ride.date|date('d/m/Y') }}"
+                                                        data-ride-time="{{ ride.departureTime|date('H:i') }}"
+                                                        data-ride-price="{{ ride.price }}"
+                                                        data-ride-available-seats="{{ ride.availableSeats }}"
+                                                        class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                                        Réserver
+                                                    </button>
+                                                {% else %}
+                                                    <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center ring-2 ring-backgroundDark">
+                                                        Complet
+                                                    </span>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% elseif ride.driver == app.user %}
+                                            <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center">
+                                                Votre trajet
+                                            </span>
+                                        {% else %}
+                                            {% if ride.availableSeats > 0 %}
+                                                <a href="{{ path('app_login') }}" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto text-center block">
+                                                    Se connecter
+                                                </a>
+                                            {% else %}
+                                                <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center ring-2 ring-backgroundDark">
+                                                    Complet
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </section>
 
 </div>
+
+
+<div id="reservationModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
+    <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+        <div class="text-center">
+            <div class="mb-4">
+                <svg class="w-16 h-16 text-accent mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <h3 class="text-subtitle font-title text-backgroundDark mb-2">Réserver ce trajet</h3>
+            <div id="reservationDetails" class="text-background mb-4">
+            </div>
+            
+            <div class="mb-6">
+                <label for="seats" class="block text-backgroundDark font-base mb-2">Nombre de places :</label>
+                <select id="seats" class="w-full px-3 py-2 bg-background/60 border border-background/30 rounded-lg text-backgroundDark">
+                    <option value="1">1 place</option>
+                </select>
+            </div>
+            <div class="flex gap-4 justify-center">
+                <button id="confirmReservationBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-base py-3 px-6 rounded-xl transition-all duration-300">
+                    Confirmer la réservation
+                </button>
+                <button id="cancelReservationBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ importmap('city-autocomplete') }}
+
+<script>
+var currentRideId = null;
+
+// Initialiser l'autocomplétion quand le DOM est chargé
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof CityAutocomplete !== 'undefined') {
+        const departureAutocomplete = new CityAutocomplete('departure', 'departure-suggestions');
+        const arrivalAutocomplete = new CityAutocomplete('arrival', 'arrival-suggestions');
+        
+        // Fonction de positionnement pour cette page spécifiquement
+        function positionSuggestionsForRidePage() {
+            [departureAutocomplete, arrivalAutocomplete].forEach(autocomplete => {
+                if (autocomplete.suggestions && !autocomplete.suggestions.classList.contains('hidden')) {
+                    const inputRect = autocomplete.input.getBoundingClientRect();
+                    autocomplete.suggestions.style.left = inputRect.left + 'px';
+                    autocomplete.suggestions.style.top = (inputRect.bottom + window.scrollY) + 'px';
+                    autocomplete.suggestions.style.width = inputRect.width + 'px';
+                }
+            });
+        }
+        
+        // Observer les changements de visibilité des suggestions
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class') {
+                    const target = mutation.target;
+                    if (target.id === 'departure-suggestions' || target.id === 'arrival-suggestions') {
+                        if (!target.classList.contains('hidden')) {
+                            setTimeout(positionSuggestionsForRidePage, 0);
+                        }
+                    }
+                }
+            });
+        });
+        
+        observer.observe(document.getElementById('departure-suggestions'), { attributes: true });
+        observer.observe(document.getElementById('arrival-suggestions'), { attributes: true });
+    }
+});
+
+function reserveRide(rideId) {
+    currentRideId = rideId;
+    var button = event.target;
+    var departure = button.getAttribute('data-ride-departure');
+    var arrival = button.getAttribute('data-ride-arrival');
+    var date = button.getAttribute('data-ride-date');
+    var time = button.getAttribute('data-ride-time');
+    var availableSeats = parseInt(button.getAttribute('data-ride-available-seats'));
+    
+    document.getElementById('reservationDetails').innerHTML = 
+        '<p><strong>' + departure + ' → ' + arrival + '</strong></p>' +
+        '<p>' + date + ' à ' + time + '</p>';
+    
+    var select = document.getElementById('seats');
+    select.innerHTML = '';
+    for (var i = 1; i <= Math.min(4, availableSeats); i++) {
+        select.innerHTML += '<option value="' + i + '">' + i + ' place' + (i > 1 ? 's' : '') + '</option>';
+    }
+    
+    document.getElementById('reservationModal').classList.remove('hidden');
+}
+
+function confirmReservation() {
+    var seats = parseInt(document.getElementById('seats').value);
+    var btn = document.getElementById('confirmReservationBtn');
+    btn.disabled = true;
+    btn.textContent = 'Réservation...';
+    
+    fetch('/trajets/' + currentRideId + '/reserver', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ seats: seats })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('reservationModal').classList.add('hidden');
+            showSuccessPopup();
+            setTimeout(() => location.reload(), 3000);
+        } else {
+            alert(data.error);
+            btn.disabled = false;
+            btn.textContent = 'Confirmer la réservation';
+        }
+    });
+}
+
+document.getElementById('confirmReservationBtn').addEventListener('click', confirmReservation);
+document.getElementById('cancelReservationBtn').addEventListener('click', function() {
+    document.getElementById('reservationModal').classList.add('hidden');
+});
+
+function showSuccessPopup() {
+    // Créer le pop-up de succès
+    const popup = document.createElement('div');
+    popup.className = 'success-popup fixed inset-0 bg-black bg-opacity-50 z-[80] flex items-center justify-center';
+    popup.innerHTML = `
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 max-w-md mx-4 transform transition-all">
+            <div class="text-center">
+                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Demande de réservation envoyée !</h3>
+                <p class="text-background text-sm">Le conducteur va examiner votre demande</p>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter au body
+    document.body.appendChild(popup);
+    
+    // Animation d'apparition
+    popup.style.opacity = '0';
+    requestAnimationFrame(() => {
+        popup.style.transition = 'opacity 0.3s ease-in';
+        popup.style.opacity = '1';
+    });
+    
+    // Auto-fermeture après 3 secondes
+    setTimeout(() => {
+        popup.style.opacity = '0';
+        popup.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => popup.remove(), 300);
+    }, 3000);
+}
+</script>
+
 {% endblock %}

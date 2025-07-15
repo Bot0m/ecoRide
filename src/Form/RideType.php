@@ -25,7 +25,9 @@ class RideType extends AbstractType
             ->add('departure', TextType::class, [
                 'label' => 'Ville de départ',
                 'attr' => [
+                    'id' => 'ride_departure',
                     'placeholder' => 'Ex: Paris, Lyon, Marseille...',
+                    'autocomplete' => 'off',
                     'class' => 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'
                 ],
                 'constraints' => [
@@ -36,7 +38,9 @@ class RideType extends AbstractType
             ->add('arrival', TextType::class, [
                 'label' => 'Ville d\'arrivée',
                 'attr' => [
+                    'id' => 'ride_arrival',
                     'placeholder' => 'Ex: Paris, Lyon, Marseille...',
+                    'autocomplete' => 'off',
                     'class' => 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'
                 ],
                 'constraints' => [

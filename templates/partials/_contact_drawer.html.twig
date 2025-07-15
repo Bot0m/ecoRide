@@ -18,7 +18,7 @@
   </button>
 
   {% for message in app.flashes('success') %}
-            <div class="backdrop-blur-sm bg-accent/20 border border-accent/30 text-accent p-3 rounded-xl mb-4 text-body">
+            <div class="backdrop-blur-sm bg-accent bg-opacity-20 border border-accent border-opacity-30 text-accent p-3 rounded-xl mb-4 text-body">
       {{ message }}
     </div>
   {% endfor %}
