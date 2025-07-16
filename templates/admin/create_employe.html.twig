@@ -1,14 +1,13 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/base.html.twig' %}
 
 {% block title %}Créer un employé{% endblock %}
 
-{% block body %}
-    <h1>Créer un nouvel employé</h1>
+{% block admin_content %}
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Créer un nouvel employé</h1>
+        <p class="text-lg text-textSecondary">Ajoutez un nouveau membre à votre équipe Ecoride</p>
+    </div>
 
-    {{ form_start(form) }}
-        {{ form_row(form.pseudo) }}
-        {{ form_row(form.email) }}
-        {{ form_row(form.plainPassword) }}
-        <button class="btn btn-primary">Créer</button>
-    {{ form_end(form) }}
+
 {% endblock %}

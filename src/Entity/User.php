@@ -43,6 +43,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     private ?string $userType = null;
 
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt = null;
+
     /**
      * @var Collection<int, Vehicle>
      */
@@ -92,6 +95,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->reviewsReceived = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->credits = 20;
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -194,6 +198,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUserType(?string $userType): static
     {
         $this->userType = $userType;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

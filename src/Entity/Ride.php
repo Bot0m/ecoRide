@@ -40,6 +40,9 @@ class Ride
     #[ORM\Column(type: 'boolean')]
     private ?bool $isEcological = null;
 
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt = null;
+
     #[ORM\ManyToOne(inversedBy: 'drivenRides')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $driver = null;
@@ -64,6 +67,7 @@ class Ride
     {
         $this->passengers = new ArrayCollection();
         $this->participations = new ArrayCollection();
+        $this->createdAt = new \DateTime();
     }
 
     public function getId(): ?int
@@ -163,6 +167,18 @@ class Ride
     public function setIsEcological(bool $isEcological): static
     {
         $this->isEcological = $isEcological;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

@@ -58,20 +58,13 @@
               {# Options spécifiques selon le rôle #}
               {% if is_granted('ROLE_ADMIN') %}
                 <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Administration</a>
+                  <a href="{{ path('admin_dashboard') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Dashboard</a>
                 </li>
                 <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte employé</a>
+                  <a href="{{ path('admin_create_employe') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Gestion employés</a>
                 </li>
                 <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Compte utilisateur</a>
-                </li>
-              {% elseif is_granted('ROLE_EMPLOYE') %}
-                <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300  hover:text-accent">Les voyages</a>
-                </li>
-                <li>
-                  <a href="{{ path('app_construction') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Avis</a>
+                  <a href="#" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Gestion utilisateurs</a>
                 </li>
               {% else %}
                 {# Options pour les utilisateurs standards uniquement #}
