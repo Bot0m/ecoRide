@@ -1,5 +1,6 @@
 # Messages de sécurité et d'authentification
 "Invalid credentials.": "Identifiants incorrects."
+"Votre compte a été suspendu. Veuillez contacter l'administrateur.": "Votre compte a été suspendu. Veuillez contacter l'administrateur."
 
 # Messages d'erreur de connexion
 login:

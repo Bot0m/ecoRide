@@ -1,13 +1,385 @@
 {% extends 'admin/base.html.twig' %}
 
-{% block title %}Créer un employé{% endblock %}
+{% block title %}Gestion des employés{% endblock %}
 
 {% block admin_content %}
     <!-- En-tête de bienvenue -->
     <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
-        <h1 class="text-title font-title text-textPrimary mb-2">Créer un nouvel employé</h1>
-        <p class="text-lg text-textSecondary">Ajoutez un nouveau membre à votre équipe Ecoride</p>
+        <h1 class="text-title font-title text-textPrimary mb-2">Gestion des employés</h1>
+        <p class="text-subtitle font-base text-textSecondary">Ajoutez et gérez les employés de votre équipe Ecoride</p>
     </div>
 
+    <!-- Bouton d'ajout d'employé -->
+    <div class="mb-6">
+        <button onclick="openAddEmployeeModal()" class="inline-flex items-center bg-accent text-textSecondary hover:text-textPrimary font-base px-6 py-3 rounded-lg hover:bg-accentDark transition-all duration-300 shadow-lg hover:shadow-xl">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+            Ajouter un employé
+        </button>
+    </div>
 
+    <!-- Section Liste des employés -->
+    <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30">
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Liste des employés</h2>
+        
+        {% if employees|length > 0 %}
+            <!-- En-têtes du tableau (desktop uniquement) -->
+            <div class="hidden md:grid md:grid-cols-4 gap-4 pb-4 mb-4 border-b border-accentDark">
+                <div class="text-base font-body text-textPrimary">Nom</div>
+                <div class="text-base font-body text-textPrimary">Adresse mail</div>
+                <div class="text-base font-body text-textPrimary text-center">Statut</div>
+                <div class="text-base font-body text-textPrimary text-center">Actions</div>
+            </div>
+
+            <!-- Liste des employés -->
+            <div class="space-y-4">
+                {% for employee in employees %}
+                    <!-- Version mobile (cards) -->
+                    <div class="md:hidden bg-accent/10 rounded-lg p-4 border border-accent/20">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="text-body font-base text-textPrimary">{{ employee.pseudo }}</h3>
+                                <p class="text-secondary font-body text-textSecondary break-all">{{ employee.email }}</p>
+                            </div>
+                            <div class="flex items-center space-x-2 ml-3">
+                                <!-- Icône Modifier -->
+                                <button onclick="openEditEmployeeModal({{ employee.id }})" 
+                                        class="text-accent hover:text-accentDark transition-colors duration-300 bg-transparent border-0 cursor-pointer p-2 rounded-lg hover:bg-accent/10">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {% if employee.isActive %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-green-100 text-green-800 border border-green-200">
+                                        Actif
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-red-100 text-red-800 border border-red-200">
+                                        Suspendu
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <button onclick="confirmToggleEmployeeStatus({{ employee.id }}, '{{ employee.pseudo }}', {{ employee.isActive ? 'true' : 'false' }})" 
+                                    class="{% if employee.isActive %}text-red-600 hover:text-red-800{% else %}text-green-600 hover:text-green-800{% endif %} font-base transition-colors duration-300 bg-transparent border-0 cursor-pointer px-3 py-1 rounded-lg">
+                                {% if employee.isActive %}Suspendre{% else %}Activer{% endif %}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Version desktop (tableau) -->
+                    <div class="hidden md:grid md:grid-cols-4 gap-4 items-center py-3 border-b border-accent/20 last:border-b-0">
+                        <!-- Nom -->
+                        <div class="text-body text-textPrimary">{{ employee.pseudo }}</div>
+                        
+                        <!-- Email -->
+                        <div class="text-body text-textSecondary">{{ employee.email }}</div>
+                        
+                        <!-- Statut -->
+                        <div class="text-center">
+                            {% if employee.isActive %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-green-100 text-green-800 border border-green-200">
+                                    Actif
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-red-100 text-red-800 border border-red-200">
+                                    Suspendu
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex justify-end items-center space-x-3">
+                            <!-- Lien Activer/Suspendre -->
+                            <button onclick="confirmToggleEmployeeStatus({{ employee.id }}, '{{ employee.pseudo }}', {{ employee.isActive ? 'true' : 'false' }})" 
+                                    class="{% if employee.isActive %}text-red-600 hover:text-red-800{% else %}text-green-600 hover:text-green-800{% endif %} font-base transition-colors duration-300 bg-transparent border-0 cursor-pointer">
+                                {% if employee.isActive %}Suspendre{% else %}Activer{% endif %}
+                            </button>
+                            <button onclick="openEditEmployeeModal({{ employee.id }})" 
+                                    class="text-accent hover:text-accentDark transition-colors duration-300 bg-transparent border-0 cursor-pointer p-1 rounded-lg hover:bg-accent/10">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Statistiques -->
+            <div class="mt-6 pt-6 border-t border-accent/20">
+                <div class="text-center">
+                    <div class="bg-accent/10 rounded-lg p-4 max-w-xs mx-auto">
+                        <div class="text-subtitle font-title text-accent">{{ totalEmployees }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Total employés</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            {% if totalPages > 1 %}
+                <div class="flex justify-center items-center mt-8 space-x-2">
+                    <!-- Bouton Précédent -->
+                    {% if currentPage > 1 %}
+                        <a href="{{ path('admin_create_employe', {'page': currentPage - 1}) }}" 
+                           class="flex items-center px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                            <svg class="w-4 h-4 md:me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <span class="hidden md:inline">Précédent</span>
+                        </a>
+                    {% endif %}
+
+                    <!-- Numéros de pages (cachés sur mobile) -->
+                    <div class="hidden md:flex space-x-2">
+                        {% for page in 1..totalPages %}
+                            {% if page == currentPage %}
+                                <span class="px-3 py-2 text-body font-base bg-accent text-textSecondary rounded-lg">
+                                    {{ page }}
+                                </span>
+                            {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                                <a href="{{ path('admin_create_employe', {'page': page}) }}" 
+                                   class="px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                                    {{ page }}
+                                </a>
+                            {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                                <span class="px-3 py-2 text-textSecondary">...</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Indicateur de page sur mobile -->
+                    <div class="md:hidden px-3 py-2 text-body font-base text-textSecondary">
+                        {{ currentPage }}/{{ totalPages }}
+                    </div>
+
+                    <!-- Bouton Suivant -->
+                    {% if currentPage < totalPages %}
+                        <a href="{{ path('admin_create_employe', {'page': currentPage + 1}) }}" 
+                           class="flex items-center px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                            <span class="hidden md:inline">Suivant</span>
+                            <svg class="w-4 h-4 md:ms-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-12">
+                <div class="text-textSecondary text-body mb-4">
+                    Aucun employé trouvé.
+                </div>
+                <p class="text-secondary font-body text-textSecondary">
+                    Ajoutez votre premier employé en cliquant sur le bouton ci-dessus.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    
+    <!-- Modal d'ajout d'employé -->
+    <div id="addEmployeeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-4 md:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all mx-4">
+            <div class="text-center mb-6">
+                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Ajouter un employé</h3>
+                <p class="text-background">Remplissez les informations du nouvel employé</p>
+            </div>
+            
+            {{ form_start(form, {'attr': {'id': 'addEmployeeForm', 'class': 'space-y-6'}}) }}
+                
+                <div class="space-y-4">
+                    <div>
+                        {{ form_label(form.pseudo, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.pseudo, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                        {{ form_errors(form.pseudo) }}
+                    </div>
+                    
+                    <div>
+                        {{ form_label(form.email, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.email, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+
+                    <div>
+                        {{ form_label(form.plainPassword, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                        {{ form_widget(form.plainPassword, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                        {{ form_errors(form.plainPassword) }}
+                        <p class="text-xs text-background/80 mt-1">Le mot de passe doit contenir au moins 8 caractères</p>
+                    </div>
+                </div>
+
+                <!-- Boutons -->
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl transition-all duration-300 text-base font-body">
+                        Ajouter l'employé
+                    </button>
+                    <button type="button" onclick="closeAddEmployeeModal()" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl hover:bg-background/60 transition-all duration-300 text-base font-body">
+                        Annuler
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- Modals d'édition d'employé -->
+    {% for employee in employees %}
+        <div id="editEmployeeModal{{ employee.id }}" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[60] flex items-center justify-center p-4">
+            <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-4 md:p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto transform transition-all mx-4">
+                <div class="text-center mb-6">
+                    <h3 class="text-subtitle font-title text-backgroundDark mb-2">Modifier l'employé</h3>
+                    <p class="text-background">Modifiez les informations de {{ employee.pseudo }}</p>
+                </div>
+                
+                {{ form_start(editForms[employee.id], {'attr': {'action': path('admin_edit_employe', {'id': employee.id}), 'id': 'editEmployeeForm' ~ employee.id, 'class': 'space-y-6'}}) }}
+                    
+                    <div class="space-y-4">
+                        <div>
+                            {{ form_label(editForms[employee.id].pseudo, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                            {{ form_widget(editForms[employee.id].pseudo, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                            {{ form_errors(editForms[employee.id].pseudo) }}
+                        </div>
+                        
+                        <div>
+                            {{ form_label(editForms[employee.id].email, null, {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                            {{ form_widget(editForms[employee.id].email, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                            {{ form_errors(editForms[employee.id].email) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(editForms[employee.id].plainPassword, 'Nouveau mot de passe (optionnel)', {'label_attr': {'class': 'block text-body font-base text-backgroundDark mb-2'}}) }}
+                            {{ form_widget(editForms[employee.id].plainPassword, {'attr': {'class': 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark placeholder-backgroundDark/60 focus:outline-none focus:border-accent backdrop-blur-sm'}}) }}
+                            {{ form_errors(editForms[employee.id].plainPassword) }}
+                            <p class="text-xs text-background/80 mt-1">Laissez vide pour conserver le mot de passe actuel</p>
+                        </div>
+                    </div>
+
+                    <!-- Boutons -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="flex-1 bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl transition-all duration-300 text-base font-body">
+                            Sauvegarder
+                        </button>
+                        <button type="button" onclick="closeEditEmployeeModal({{ employee.id }})" class="flex-1 bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl hover:bg-background/60 transition-all duration-300 text-base font-body">
+                            Annuler
+                        </button>
+                    </div>
+                {{ form_end(editForms[employee.id]) }}
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Modal de confirmation d'activation/suspension d'employé -->
+    <div id="toggleEmployeeStatusModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 md:p-8 max-w-md w-full mx-4 transform transition-all">
+            <div class="text-center">
+                <h3 id="toggleEmployeeStatusTitle" class="text-subtitle font-title text-backgroundDark mb-2"></h3>
+                <p class="text-background mb-6" id="toggleEmployeeStatusText">
+                </p>
+                <div class="flex gap-3 justify-center">
+                    <button id="confirmToggleEmployeeStatusBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl transition-all duration-300 text-base font-body">
+                    </button>
+                    <button id="cancelToggleEmployeeStatusBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl hover:bg-background/60 transition-all duration-300 text-base font-body">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let employeeToToggle = null;
+
+        function openAddEmployeeModal() {
+            document.getElementById('addEmployeeModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddEmployeeModal() {
+            document.getElementById('addEmployeeModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function openEditEmployeeModal(employeeId) {
+            document.getElementById('editEmployeeModal' + employeeId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditEmployeeModal(employeeId) {
+            document.getElementById('editEmployeeModal' + employeeId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function confirmToggleEmployeeStatus(employeeId, employeeName, isActive) {
+            employeeToToggle = employeeId;
+            const action = isActive ? 'suspendre' : 'activer';
+            const title = isActive ? 'Suspendre l\'employé' : 'Activer l\'employé';
+            
+            document.getElementById('toggleEmployeeStatusTitle').textContent = title;
+            document.getElementById('toggleEmployeeStatusText').textContent = 
+                `Êtes-vous sûr de vouloir ${action} l'employé "${employeeName}" ?`;
+            document.getElementById('confirmToggleEmployeeStatusBtn').textContent = 
+                isActive ? 'Oui, suspendre' : 'Oui, activer';
+            
+            document.getElementById('toggleEmployeeStatusModal').classList.remove('hidden');
+        }
+
+        // Fermer les modals en cliquant en dehors
+        document.getElementById('addEmployeeModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeAddEmployeeModal();
+            }
+        });
+
+        {% for employee in employees %}
+            document.getElementById('editEmployeeModal{{ employee.id }}').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeEditEmployeeModal({{ employee.id }});
+                }
+            });
+        {% endfor %}
+
+        document.getElementById('toggleEmployeeStatusModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                document.getElementById('toggleEmployeeStatusModal').classList.add('hidden');
+                employeeToToggle = null;
+            }
+        });
+
+        document.getElementById('confirmToggleEmployeeStatusBtn').addEventListener('click', function() {
+            if (employeeToToggle) {
+                window.location.href = `{{ path('admin_toggle_employe_status', {'id': '__ID__'}) }}`.replace('__ID__', employeeToToggle);
+            }
+        });
+
+        document.getElementById('cancelToggleEmployeeStatusBtn').addEventListener('click', function() {
+            document.getElementById('toggleEmployeeStatusModal').classList.add('hidden');
+            employeeToToggle = null;
+        });
+
+        // Si le formulaire a des erreurs, ouvrir automatiquement le modal
+        {% if form.vars.submitted and not form.vars.valid %}
+            document.addEventListener('DOMContentLoaded', function() {
+                openAddEmployeeModal();
+            });
+        {% endif %}
+
+        // Si l'URL contient un paramètre 'edit', ouvrir le modal de modification correspondant
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            if (editId) {
+                openEditEmployeeModal(editId);
+                // Nettoyer l'URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState(null, '', newUrl);
+            }
+        });
+    </script>
 {% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block admin_content %}
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Gestion des utilisateurs</h1>
+        <p class="text-subtitle font-body text-textSecondary">Gérez les comptes utilisateurs de la plateforme Ecoride</p>
+    </div>
+
+    <!-- Section Liste des utilisateurs -->
+    <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30">
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Liste des utilisateurs</h2>
+        
+        {% if users|length > 0 %}
+            <!-- En-têtes du tableau (desktop seulement) -->
+            <div class="hidden md:grid grid-cols-[1fr_2fr_1fr_1fr_1fr] gap-4 pb-4 mb-4 border-b border-accentDark">
+                <div class="text-base font-body text-textPrimary">Nom</div>
+                <div class="text-base font-body text-textPrimary">Email</div>
+                <div class="text-base font-body text-textPrimary text-center">Type</div>
+                <div class="text-base font-body text-textPrimary text-center">Statut</div>
+                <div class="text-base font-body text-textPrimary text-center">Actions</div>
+            </div>
+
+            <!-- Liste des utilisateurs -->
+            <div class="space-y-4">
+                {% for user in users %}
+                    <!-- Version mobile (cards) -->
+                    <div class="md:hidden bg-accent/10 rounded-lg p-4 border border-accent/20">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <h3 class="text-body font-base text-textPrimary">{{ user.pseudo }}</h3>
+                                <p class="text-secondary font-body text-textSecondary break-all">{{ user.email }}</p>
+                                <p class="text-secondary font-body text-textPrimary mt-1">
+                                    {% set userRole = user.getUserRole() %}
+                                    {% if userRole == 'Conducteur et Passager' %}
+                                        les deux
+                                    {% else %}
+                                        {{ userRole }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                {% if user.isActive %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-green-100 text-green-800 border border-green-200">
+                                        Actif
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-red-100 text-red-800 border border-red-200">
+                                        Suspendu
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <button onclick="confirmToggleUserStatus({{ user.id }}, '{{ user.pseudo }}', {{ user.isActive ? 'true' : 'false' }})" 
+                                    class="{% if user.isActive %}text-red-600 hover:text-red-800{% else %}text-green-600 hover:text-green-800{% endif %} font-base transition-colors duration-300 bg-transparent border-0 cursor-pointer px-3 py-1 rounded-lg">
+                                {% if user.isActive %}Suspendre{% else %}Activer{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Version desktop (tableau) -->
+                    <div class="hidden md:grid md:grid-cols-[1fr_2fr_1fr_1fr_1fr] gap-4 items-center py-3 border-b border-accent/20 last:border-b-0">
+                        <!-- Nom -->
+                        <div class="text-body text-textPrimary font-base">{{ user.pseudo }}</div>
+                        
+                        <!-- Email -->
+                        <div class="text-body text-textSecondary truncate">{{ user.email }}</div>
+                        
+                        <!-- Type d'utilisateur -->
+                        <div class="text-center text-body text-textPrimary">
+                            {% set userRole = user.getUserRole() %}
+                            {% if userRole == 'Conducteur et Passager' %}
+                                les deux
+                            {% else %}
+                                {{ userRole }}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Statut -->
+                        <div class="text-center">
+                            {% if user.isActive %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-green-100 text-green-800 border border-green-200">
+                                    Actif
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-body font-base bg-red-100 text-red-800 border border-red-200">
+                                    Suspendu
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="flex justify-center space-x-2">
+                            <!-- Bouton Activer/Suspendre -->
+                            <button onclick="confirmToggleUserStatus({{ user.id }}, '{{ user.pseudo }}', {{ user.isActive ? 'true' : 'false' }})" 
+                                    class="{% if user.isActive %}text-red-600 hover:text-red-800{% else %}text-green-600 hover:text-green-800{% endif %} font-base transition-colors duration-300 bg-transparent border-0 cursor-pointer px-3 py-1 rounded-lg">
+                                {% if user.isActive %}Suspendre{% else %}Activer{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Statistiques -->
+            <div class="mt-6 pt-6 border-t border-accent/20">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-accent/10 rounded-lg p-4">
+                        <div class="text-subtitle font-title text-accent">{{ users|length }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Total utilisateurs</div>
+                    </div>
+                    <div class="bg-green-100 rounded-lg p-4">
+                        <div class="text-subtitle font-title text-green-600">{{ users|filter(u => u.isActive)|length }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Comptes actifs</div>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-4">
+                        <div class="text-subtitle font-title text-red-600">{{ users|filter(u => not u.isActive)|length }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Comptes suspendus</div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-12">
+                <div class="text-textSecondary text-body mb-4">
+                    Aucun utilisateur trouvé.
+                </div>
+                <p class="text-secondary font-body text-textSecondary">
+                    Les nouveaux utilisateurs apparaîtront ici une fois qu'ils se seront inscrits.
+                </p>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if totalPages > 1 %}
+            <div class="flex justify-center items-center mt-8 space-x-2">
+                <!-- Bouton Précédent -->
+                {% if currentPage > 1 %}
+                    <a href="{{ path('admin_users', {'page': currentPage - 1}) }}" 
+                       class="flex items-center px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                        <svg class="w-4 h-4 md:me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="hidden md:inline">Précédent</span>
+                    </a>
+                {% endif %}
+
+                <!-- Numéros de pages (cachés sur mobile) -->
+                <div class="hidden md:flex space-x-2">
+                    {% for page in 1..totalPages %}
+                        {% if page == currentPage %}
+                            <span class="px-3 py-2 text-body font-base bg-accent text-textSecondary rounded-lg">
+                                {{ page }}
+                            </span>
+                        {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                            <a href="{{ path('admin_users', {'page': page}) }}" 
+                               class="px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                                {{ page }}
+                            </a>
+                        {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                            <span class="px-3 py-2 text-textSecondary">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Indicateur de page sur mobile -->
+                <div class="md:hidden px-3 py-2 text-body font-base text-textSecondary">
+                    {{ currentPage }}/{{ totalPages }}
+                </div>
+
+                <!-- Bouton Suivant -->
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('admin_users', {'page': currentPage + 1}) }}" 
+                       class="flex items-center px-3 py-2 text-body font-base text-textSecondary hover:text-accent transition-colors duration-300 bg-background/40 border border-background/30 rounded-lg hover:bg-background/60">
+                        <span class="hidden md:inline">Suivant</span>
+                        <svg class="w-4 h-4 md:ms-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal de confirmation d'activation/suspension d'utilisateur -->
+    <div id="toggleUserStatusModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 md:p-8 max-w-md w-full mx-4 transform transition-all">
+            <div class="text-center">
+                <h3 id="toggleUserStatusTitle" class="text-subtitle font-title text-backgroundDark mb-2"></h3>
+                <p class="text-background mb-6" id="toggleUserStatusText">
+                </p>
+                <div class="flex gap-3 justify-center">
+                    <button id="confirmToggleUserStatusBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl transition-all duration-300 text-base font-body">
+                    </button>
+                    <button id="cancelToggleUserStatusBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl hover:bg-background/60 transition-all duration-300 text-base font-body">
+                        Annuler
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userToToggle = null;
+
+        function confirmToggleUserStatus(userId, userName, isActive) {
+            userToToggle = userId;
+            const action = isActive ? 'suspendre' : 'activer';
+            const title = isActive ? 'Suspendre l\'utilisateur' : 'Activer l\'utilisateur';
+            
+            document.getElementById('toggleUserStatusTitle').textContent = title;
+            document.getElementById('toggleUserStatusText').textContent = 
+                `Êtes-vous sûr de vouloir ${action} l'utilisateur "${userName}" ?`;
+            document.getElementById('confirmToggleUserStatusBtn').textContent = 
+                isActive ? 'Oui, suspendre' : 'Oui, activer';
+            
+            document.getElementById('toggleUserStatusModal').classList.remove('hidden');
+        }
+
+        // Fermer le modal en cliquant en dehors
+        document.getElementById('toggleUserStatusModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                document.getElementById('toggleUserStatusModal').classList.add('hidden');
+                userToToggle = null;
+            }
+        });
+
+        document.getElementById('confirmToggleUserStatusBtn').addEventListener('click', function() {
+            if (userToToggle) {
+                window.location.href = `{{ path('admin_toggle_user_status', {'id': '__ID__'}) }}`.replace('__ID__', userToToggle);
+            }
+        });
+
+        document.getElementById('cancelToggleUserStatusBtn').addEventListener('click', function() {
+            document.getElementById('toggleUserStatusModal').classList.add('hidden');
+            userToToggle = null;
+        });
+    </script>
+{% endblock %} 

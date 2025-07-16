@@ -223,6 +223,8 @@ class AdminController extends AbstractController
     #[Route('/create-employe', name: 'admin_create_employe')]
     public function createEmploye(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $user = new User();
         $form = $this->createForm(EmployeType::class, $user);
         $form->handleRequest($request);
@@ -230,6 +232,7 @@ class AdminController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setRoles(['ROLE_EMPLOYE']);
             $user->setCredits(0);
+            $user->setIsActive(true);
 
             $plainPassword = $form->get('plainPassword')->getData();
             $hashedPassword = $hasher->hashPassword($user, $plainPassword);
@@ -238,12 +241,150 @@ class AdminController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Employé créé avec succès !');
-            return $this->redirectToRoute('admin_dashboard');
+            return $this->redirectToRoute('admin_create_employe');
+        }
+
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Compter le total d'employés
+        $totalEmployees = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_EMPLOYE%')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Récupérer les employés paginés
+        $employees = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u.roles LIKE :role')
+            ->setParameter('role', '%ROLE_EMPLOYE%')
+            ->orderBy('u.pseudo', 'ASC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        $totalPages = ceil($totalEmployees / $limit);
+
+        // Formulaire d'édition pour chaque employé
+        $editForms = [];
+        foreach ($employees as $employee) {
+            $editForms[$employee->getId()] = $this->createForm(EmployeType::class, $employee)->createView();
         }
 
         return $this->render('admin/create_employe.html.twig', [
             'form' => $form->createView(),
+            'employees' => $employees,
+            'editForms' => $editForms,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalEmployees' => $totalEmployees,
         ]);
+    }
+
+    #[Route('/employe/{id}/toggle-status', name: 'admin_toggle_employe_status')]
+    public function toggleEmployeStatus(User $user, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Vérifier que c'est bien un employé
+        if (!in_array('ROLE_EMPLOYE', $user->getRoles())) {
+            throw $this->createNotFoundException('Employé non trouvé');
+        }
+
+        $user->setIsActive(!$user->getIsActive());
+        $entityManager->flush();
+
+        return $this->redirectToRoute('admin_create_employe');
+    }
+
+    #[Route('/employe/{id}/edit', name: 'admin_edit_employe')]
+    public function editEmploye(User $user, Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $hasher): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Vérifier que c'est bien un employé
+        if (!in_array('ROLE_EMPLOYE', $user->getRoles())) {
+            throw $this->createNotFoundException('Employé non trouvé');
+        }
+
+        $form = $this->createForm(EmployeType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Si un nouveau mot de passe a été fourni
+            $plainPassword = $form->get('plainPassword')->getData();
+            if ($plainPassword) {
+                $hashedPassword = $hasher->hashPassword($user, $plainPassword);
+                $user->setPassword($hashedPassword);
+            }
+
+            $entityManager->flush();
+            return $this->redirectToRoute('admin_create_employe');
+        }
+
+        // Si le formulaire a des erreurs, rediriger vers la page principale avec l'ID de l'employé à éditer
+        return $this->redirectToRoute('admin_create_employe', ['edit' => $user->getId()]);
+    }
+
+    #[Route('/users', name: 'admin_users')]
+    public function manageUsers(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Compter le total d'utilisateurs
+        $totalUsers = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles NOT LIKE :admin AND u.roles NOT LIKE :employe')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('employe', '%ROLE_EMPLOYE%')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Récupérer les utilisateurs paginés
+        $users = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->where('u.roles NOT LIKE :admin AND u.roles NOT LIKE :employe')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('employe', '%ROLE_EMPLOYE%')
+            ->orderBy('u.pseudo', 'ASC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        $totalPages = ceil($totalUsers / $limit);
+
+        return $this->render('admin/users.html.twig', [
+            'users' => $users,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalUsers' => $totalUsers,
+        ]);
+    }
+
+    #[Route('/user/{id}/toggle-status', name: 'admin_toggle_user_status')]
+    public function toggleUserStatus(User $user, EntityManagerInterface $entityManager): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        // Vérifier que ce n'est pas un admin ou employé
+        if (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_EMPLOYE', $user->getRoles())) {
+            throw $this->createNotFoundException('Impossible de modifier ce type de compte');
+        }
+
+        $user->setIsActive(!$user->getIsActive());
+        $entityManager->flush();
+
+        return $this->redirectToRoute('admin_users');
     }
 }

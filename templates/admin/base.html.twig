@@ -13,7 +13,7 @@
             <a href="{{ path('admin_create_employe') }}" class="admin-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
                 Gestion employés
             </a>
-            <a href="#" class="admin-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
+            <a href="{{ path('admin_users') }}" class="admin-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
                 Gestion utilisateurs
             </a>
         </nav>
@@ -54,12 +54,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-function confirmLogout(event) {
-    event.preventDefault();
-    if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-        window.location.href = '{{ path('app_logout') }}';
-    }
-}
 </script>
 {% endblock %} 
