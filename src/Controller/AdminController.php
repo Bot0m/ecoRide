@@ -25,9 +25,10 @@ class AdminController extends AbstractController
         $minDate = new \DateTime('2024-06-23'); // Lundi 23 juin 2024
         $minDate->setTime(0, 0, 0);
         
-        // Récupérer les semaines sélectionnées depuis la requête (séparées pour users et rides)
+        // Récupérer les semaines sélectionnées depuis la requête (séparées pour users, rides et credits)
         $selectedUserWeekParam = $request->query->get('user_week');
         $selectedRideWeekParam = $request->query->get('ride_week');
+        $selectedCreditsWeekParam = $request->query->get('credits_week');
         
         $today = new \DateTime();
         $currentDayOfWeek = (int)$today->format('N');
@@ -84,17 +85,11 @@ class AdminController extends AbstractController
 
         $ecoRides = $entityManager->getRepository(Ride::class)->count(['isEcological' => true]);
 
-        // Statistiques crédits (seulement les vrais utilisateurs)
-        $totalCredits = $entityManager->getRepository(User::class)
-            ->createQueryBuilder('u')
-            ->select('SUM(u.credits)')
-            ->where('u.roles NOT LIKE :admin AND u.roles NOT LIKE :employe')
-            ->setParameter('admin', '%ROLE_ADMIN%')
-            ->setParameter('employe', '%ROLE_EMPLOYE%')
-            ->getQuery()
-            ->getSingleScalarResult() ?? 0;
+        // Statistiques crédits de la plateforme (2 crédits par participation)
+        $totalParticipations = $entityManager->getRepository(\App\Entity\Participation::class)->count([]);
+        $totalCreditsPlatform = $totalParticipations * 2; // 2 crédits par participation
 
-        $avgCredits = $totalUsers > 0 ? round($totalCredits / $totalUsers) : 0;
+        $avgCreditsPerParticipation = $totalParticipations > 0 ? round($totalCreditsPlatform / $totalParticipations) : 0;
 
         // Statistiques avis
         $totalReviews = $entityManager->getRepository(Review::class)->count([]);
@@ -136,7 +131,7 @@ class AdminController extends AbstractController
                             ->setParameter('dayEnd', $dayEnd)
                             ->getQuery()
                             ->getSingleScalarResult();
-                    } else { // ride
+                    } elseif ($entityType === 'ride') {
                         $count = $entityManager->getRepository(Ride::class)
                             ->createQueryBuilder('r')
                             ->select('COUNT(r.id)')
@@ -145,6 +140,17 @@ class AdminController extends AbstractController
                             ->setParameter('dayEnd', $dayEnd)
                             ->getQuery()
                             ->getSingleScalarResult();
+                    } else { // credits
+                        // Compter les participations créées ce jour et multiplier par 2 (commission plateforme)
+                        $count = $entityManager->getRepository(\App\Entity\Participation::class)
+                            ->createQueryBuilder('p')
+                            ->select('COUNT(p.id)')
+                            ->where('p.createdAt BETWEEN :dayStart AND :dayEnd')
+                            ->setParameter('dayStart', $dayStart)
+                            ->setParameter('dayEnd', $dayEnd)
+                            ->getQuery()
+                            ->getSingleScalarResult();
+                        $count = $count * 2; // 2 crédits par participation
                     }
                     
                     $weeklyData[$i] = (int)$count;
@@ -176,9 +182,10 @@ class AdminController extends AbstractController
             ];
         };
 
-        // Traiter les deux semaines séparément
+        // Traiter les trois semaines séparément
         $selectedUserWeek = $processSelectedWeek($selectedUserWeekParam);
         $selectedRideWeek = $processSelectedWeek($selectedRideWeekParam);
+        $selectedCreditsWeek = $processSelectedWeek($selectedCreditsWeekParam);
 
         // Générer les données pour les utilisateurs
         [$weeklyUserData, $userWeekLabels] = $generateWeekData($selectedUserWeek, 'user');
@@ -188,9 +195,14 @@ class AdminController extends AbstractController
         [$weeklyRideData, $rideWeekLabels] = $generateWeekData($selectedRideWeek, 'ride');
         $rideNavigation = $generateNavigation($selectedRideWeek, $minDate, $today);
 
+        // Générer les données pour les crédits (semaine séparée)
+        [$weeklyCreditsData, $creditsWeekLabels] = $generateWeekData($selectedCreditsWeek, 'credits');
+        $creditsNavigation = $generateNavigation($selectedCreditsWeek, $minDate, $today);
+        
         // Calculs cohérents basés sur les VRAIES données
         $newUsersThisWeek = array_sum($weeklyUserData);
         $newRidesThisWeek = array_sum($weeklyRideData);
+        $newCreditsThisWeek = array_sum($weeklyCreditsData);
         
         return $this->render('admin/index.html.twig', [
             'user' => $this->getUser(),
@@ -200,14 +212,17 @@ class AdminController extends AbstractController
                 'totalRides' => $totalRides,
                 'ridesThisWeek' => $newRidesThisWeek,
                 'ecoRides' => $ecoRides,
-                'totalCredits' => $totalCredits,
-                'avgCredits' => $avgCredits,
+                'totalCredits' => $totalCreditsPlatform,
+                'avgCredits' => $avgCreditsPerParticipation,
+                'creditsThisWeek' => $newCreditsThisWeek,
                 'totalReviews' => $totalReviews,
                 'avgRating' => round($avgRating, 1),
                 'weeklyUserData' => $weeklyUserData,
                 'weeklyRideData' => $weeklyRideData,
+                'weeklyCreditsData' => $weeklyCreditsData,
                 'userWeekLabels' => $userWeekLabels,
                 'rideWeekLabels' => $rideWeekLabels,
+                'creditsWeekLabels' => $creditsWeekLabels,
                 'userGrowth' => $totalUsers > 0 ? round(($newUsersThisWeek / $totalUsers) * 100, 1) : 0,
                 'rideGrowth' => $totalRides > 0 ? round(($newRidesThisWeek / $totalRides) * 100, 1) : 0,
                 'ecoPercentage' => $totalRides > 0 ? round(($ecoRides / $totalRides) * 100, 1) : 0,
@@ -216,6 +231,8 @@ class AdminController extends AbstractController
                 'userNavigation' => $userNavigation,
                 // Navigation séparée pour les trajets
                 'rideNavigation' => $rideNavigation,
+                // Navigation séparée pour les crédits
+                'creditsNavigation' => $creditsNavigation,
             ]
         ]);
     }

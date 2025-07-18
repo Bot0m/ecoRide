@@ -36,6 +36,14 @@ class Participation
     #[ORM\OneToOne(inversedBy: 'participation')]
     private ?Review $review = null;
 
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTime $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +129,18 @@ class Participation
     public function setReview(?Review $review): static
     {
         $this->review = $review;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
 
         return $this;
     }

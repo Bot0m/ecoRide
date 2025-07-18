@@ -116,6 +116,53 @@
         </div>
     </div>
 
+    <!-- Carte des crédits de la plateforme -->
+    <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-8">
+        <div class="flex justify-between pb-4 mb-4 border-b border-accentDark">
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center me-3">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="text-subtitle font-title text-accent pb-2">{{ stats.totalCredits }}</h5>
+                    <p class="text-body font-base text-textSecondary">crédits obtenus par la plateforme</p>
+                </div>
+            </div>
+        </div>
+                    <div class="grid grid-cols-1 mb-4">
+                <dl class="flex items-center">
+                    <dt class="text-textSecondary text-body font-base me-1">Cette semaine :</dt>
+                    <dd class="text-textPrimary text-body font-base">{{ stats.creditsThisWeek }}</dd>
+                </dl>
+            </div>
+
+        <div id="credits-line-chart" class="h-48 border-b border-accentDark"></div>
+
+        <div class="grid grid-cols-1 items-center pt-5">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <a href="{{ path('admin_dashboard', {'credits_week': stats.creditsNavigation.previousWeek, 'user_week': app.request.query.get('user_week') ?: stats.userNavigation.selectedWeek, 'ride_week': app.request.query.get('ride_week') ?: stats.rideNavigation.selectedWeek}) }}" 
+                       class="text-body font-base {{ stats.creditsNavigation.canGoPrevious ? 'text-textSecondary hover:text-accent' : 'text-tSecondaryLight cursor-not-allowed' }} transition-colors duration-300 inline-flex items-center {{ not stats.creditsNavigation.canGoPrevious ? 'pointer-events-none' : '' }}">
+                        <svg class="w-4 h-4 md:w-3 md:h-3 md:me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                        <span class="hidden md:inline">Précédent</span>
+                    </a>
+                    <span class="text-body font-base text-textPrimary px-3">{{ stats.creditsNavigation.weekPeriod }}</span>
+                    <a href="{{ path('admin_dashboard', {'credits_week': stats.creditsNavigation.nextWeek, 'user_week': app.request.query.get('user_week') ?: stats.userNavigation.selectedWeek, 'ride_week': app.request.query.get('ride_week') ?: stats.rideNavigation.selectedWeek}) }}" 
+                       class="text-body font-base {{ stats.creditsNavigation.canGoNext ? 'text-textSecondary hover:text-accent' : 'text-tSecondaryLight cursor-not-allowed' }} transition-colors duration-300 inline-flex items-center {{ not stats.creditsNavigation.canGoNext ? 'pointer-events-none' : '' }}">
+                        <span class="hidden md:inline">Suivant</span>
+                        <svg class="w-4 h-4 md:w-3 md:h-3 md:ms-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts pour les graphiques -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
@@ -234,5 +281,55 @@
         // Rendu des graphiques
         usersColumnChart.render();
         ridesAreaChart.render();
+
+        // Graphique en ligne pour les crédits
+        const creditsLineChart = new ApexCharts(document.querySelector("#credits-line-chart"), {
+            chart: {
+                type: 'line',
+                height: 192,
+                background: 'transparent',
+                toolbar: { show: false },
+                fontFamily: 'Inter, sans-serif'
+            },
+            series: [{
+                name: 'Crédits obtenus par la plateforme',
+                data: {{ stats.weeklyCreditsData|json_encode|raw }}
+            }],
+            xaxis: {
+                categories: {{ stats.creditsWeekLabels|json_encode|raw }},
+                labels: {
+                    style: { colors: '#6D4C41', fontSize: '10px' }
+                },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: '#6D4C41', fontSize: '12px' }
+                }
+            },
+            colors: ['#FFB74D'],
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            markers: {
+                size: 5,
+                colors: ['#FFB74D'],
+                strokeColors: '#fff',
+                strokeWidth: 2
+            },
+            grid: {
+                borderColor: '#FFB74D',
+                strokeDashArray: 4
+            },
+            dataLabels: { enabled: false },
+            tooltip: {
+                theme: 'dark',
+                style: { fontSize: '12px' }
+            }
+        });
+
+        creditsLineChart.render();
     </script>
 {% endblock %}
