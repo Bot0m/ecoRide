@@ -83,6 +83,121 @@ class RideRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findRecentRidesByUser($user, int $limit = 5): array
+    {
+        // Récupérer les voyages où l'utilisateur est conducteur
+        $drivenRides = $this->createQueryBuilder('r')
+            ->where('r.driver = :user')
+            ->setParameter('user', $user)
+            ->orderBy('r.date', 'DESC')
+            ->addOrderBy('r.departureTime', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        // Récupérer les voyages où l'utilisateur est passager (via participations acceptées)
+        $passengerRides = $this->createQueryBuilder('r')
+            ->join('r.participations', 'p')
+            ->where('p.user = :user')
+            ->andWhere('p.status = :status')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'acceptee')
+            ->orderBy('r.date', 'DESC')
+            ->addOrderBy('r.departureTime', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        // Fusionner et trier tous les voyages
+        $allRides = array_merge($drivenRides, $passengerRides);
+        
+        // Supprimer les doublons et trier par date/heure décroissante
+        $uniqueRides = [];
+        foreach ($allRides as $ride) {
+            $uniqueRides[$ride->getId()] = $ride;
+        }
+        
+        // Trier par date et heure décroissante
+        usort($uniqueRides, function($a, $b) {
+            $dateTimeA = clone $a->getDate();
+            $dateTimeA->setTime(
+                $a->getDepartureTime()->format('H'),
+                $a->getDepartureTime()->format('i')
+            );
+            
+            $dateTimeB = clone $b->getDate();
+            $dateTimeB->setTime(
+                $b->getDepartureTime()->format('H'),
+                $b->getDepartureTime()->format('i')
+            );
+            
+            return $dateTimeB <=> $dateTimeA; // Ordre décroissant
+        });
+
+        // Retourner seulement les $limit premiers
+        return array_slice($uniqueRides, 0, $limit);
+    }
+
+    public function countCompletedRidesByUser($user): int
+    {
+        $today = new \DateTimeImmutable('today');
+        
+        // Compter les voyages passés où l'utilisateur est conducteur
+        $drivenCount = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.driver = :user')
+            ->andWhere('r.date < :today')
+            ->setParameter('user', $user)
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Compter les voyages passés où l'utilisateur est passager
+        $passengerCount = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->join('r.participations', 'p')
+            ->where('p.user = :user')
+            ->andWhere('p.status = :status')
+            ->andWhere('r.date < :today')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'acceptee')
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int)$drivenCount + (int)$passengerCount;
+    }
+
+    public function countUpcomingRidesByUser($user): int
+    {
+        $today = new \DateTimeImmutable('today');
+        
+        // Compter les voyages futurs où l'utilisateur est conducteur
+        $drivenCount = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.driver = :user')
+            ->andWhere('r.date >= :today')
+            ->setParameter('user', $user)
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Compter les voyages futurs où l'utilisateur est passager
+        $passengerCount = $this->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->join('r.participations', 'p')
+            ->where('p.user = :user')
+            ->andWhere('p.status = :status')
+            ->andWhere('r.date >= :today')
+            ->setParameter('user', $user)
+            ->setParameter('status', 'acceptee')
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return (int)$drivenCount + (int)$passengerCount;
+    }
     //    /**
     //     * @return Ride[] Returns an array of Ride objects
     //     */

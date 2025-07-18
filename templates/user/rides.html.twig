@@ -168,7 +168,7 @@
         {% else %}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {% for ride in pastRides %}
-                    <div class="bg-gradient-to-br from-gray-500/20 to-gray-600/10 backdrop-blur-sm rounded-2xl p-6 border border-gray-400/30 hover:border-gray-400/50 transition-all duration-300">
+                    <div class="bg-gradient-to-br from-backgroundDark to-backgroundLight backdrop-blur-sm rounded-2xl p-6 border border-backgroundDark/30 hover:border-backgroundDark/50 transition-all duration-300">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center gap-3">
                                 <div>
@@ -187,9 +187,9 @@
                                         <span>{{ ride.date|date('d/m/Y') }}</span>
                                         <span>{{ ride.departureTime|date('H:i') }}</span>
                                         {% if ride.driver == app.user %}
-                                            <span class="text-accent text-xs">en tant que conducteur</span>
+                                            <span class="text-accentDark text-xs">en tant que conducteur</span>
                                         {% else %}
-                                            <span class="text-blue-400 text-xs">en tant que passager</span>
+                                            <span class="text-accentDark text-xs">en tant que passager</span>
                                         {% endif %}
                                     </div>
                                 </div>

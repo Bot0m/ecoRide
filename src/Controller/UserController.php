@@ -20,12 +20,20 @@ use App\Repository\ParticipationRepository;
 class UserController extends AbstractController
 {
     #[Route('/credit', name: 'credit')]
-    public function index(): Response
+    public function index(RideRepository $rideRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
+        $user = $this->getUser();
+        
+        // Récupération des statistiques
+        $completedRides = $rideRepository->countCompletedRidesByUser($user);
+        $upcomingRides = $rideRepository->countUpcomingRidesByUser($user);
+
         return $this->render('user/credit.html.twig', [
-            'user' => $this->getUser(),
+            'user' => $user,
+            'completedRides' => $completedRides,
+            'upcomingRides' => $upcomingRides,
         ]);
     }
 
