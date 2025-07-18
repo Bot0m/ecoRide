@@ -34,6 +34,10 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/employe, roles: ROLE_EMPLOYE }
         - { path: ^/credit, roles: ROLE_USER }
+        - { path: ^/mes-voyages, roles: ROLE_USER }
+        - { path: ^/mes-vehicules, roles: ROLE_USER }
+        - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/notifications, roles: ROLE_USER }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }

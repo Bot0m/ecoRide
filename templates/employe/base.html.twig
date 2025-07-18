@@ -1,0 +1,61 @@
+{# templates/employe/base.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<!-- Sidebar -->
+<aside class="hidden md:block w-80 bg-gradient-to-b from-secondary/70 via-secondary/80 to-secondary/90 backdrop-blur-2xl backdrop-saturate-150 backdrop-contrast-125 border-r-2 border-white/30 shadow-2xl text-textPrimary fixed top-0 bottom-0 pt-20 z-40">
+    <div class="p-6 h-full flex flex-col">
+        <h2 class="text-title font-title text-textPrimary mb-6">Espace Employé</h2>
+        <nav class="flex flex-col gap-4">
+            <a href="{{ path('employe_dashboard') }}" class="employe-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
+                Dashboard
+            </a>
+            <a href="{{ path('employe_all_rides') }}" class="employe-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
+                Tous les voyages
+            </a>
+            <a href="{{ path('employe_all_reviews') }}" class="employe-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
+                Les avis
+            </a>
+        </nav>
+        <hr class="border-secondaryDark my-1">
+        <button type="button" onclick="confirmLogout(event)" class="block w-full text-left px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent bg-transparent border-0 cursor-pointer">Se déconnecter</button>
+    </div>
+</aside>
+
+<!-- Content -->
+<div class="ml-0 md:ml-80 p-8 pt-20">
+    <div class="max-w-4xl mx-auto">
+        {% block employe_content %}{% endblock %}
+    </div>
+</div>
+
+<!-- Modals -->
+{% block employe_modals %}{% endblock %}
+
+<script>
+// Gestion des états actifs pour la navigation employé
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.employe-nav-link');
+    
+    // Réinitialiser tous les liens
+    navLinks.forEach(link => {
+        link.classList.remove('text-accentDark');
+        link.classList.add('text-textSecondary');
+    });
+    
+    // Mettre en surbrillance le lien actif
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.remove('text-textSecondary');
+            link.classList.add('text-accentDark');
+        }
+    });
+});
+
+function confirmLogout(event) {
+    event.preventDefault();
+    document.getElementById('logoutModal').classList.remove('hidden');
+}
+</script>
+{% endblock %} 

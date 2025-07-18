@@ -1,0 +1,148 @@
+{% extends 'employe/base.html.twig' %}
+
+{% block title %}Tous les avis{% endblock %}
+
+{% block employe_content %}
+<div class="space-y-6">
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Tous les avis</h1>
+        <p class="text-lg text-textSecondary">{{ totalReviews }} avis au total</p>
+    </div>
+
+    <!-- Liste des avis -->
+    <div class="space-y-4">
+        {% if reviews is empty %}
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                </svg>
+                <p class="text-textSecondary">Aucun avis trouvé</p>
+            </div>
+        {% else %}
+            {% for review in reviews %}
+                <div class="bg-gradient-to-br from-secondary/70 to-secondary/90 backdrop-blur-xl border border-white/30 rounded-2xl p-6 shadow-xl">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <!-- Informations principales -->
+                        <div class="flex-1">
+                            <!-- Note -->
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="flex items-center gap-1">
+                                    {% for i in 1..5 %}
+                                        {% if i <= review.rating %}
+                                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        {% else %}
+                                            <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <span class="text-textPrimary font-base">{{ review.rating }}/5</span>
+                                <span class="px-2 py-1 bg-accent/20 text-accent text-xs rounded-full">
+                                    {{ review.id }}
+                                </span>
+                            </div>
+
+                            <!-- Commentaire -->
+                            {% if review.comment %}
+                                <div class="mb-4">
+                                    <p class="text-textPrimary">{{ review.comment }}</p>
+                                </div>
+                            {% endif %}
+
+                            <!-- Informations sur le trajet -->
+                            {% if review.participation and review.participation.ride %}
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                        <p class="text-textSecondary">Trajet</p>
+                                        <p class="text-textPrimary font-base">{{ review.participation.ride.departure }} → {{ review.participation.ride.arrival }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-textSecondary">Date du trajet</p>
+                                        <p class="text-textPrimary font-base">{{ review.participation.ride.date|date('d/m/Y') }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-textSecondary">Prix</p>
+                                        <p class="text-textPrimary font-base">{{ review.participation.ride.price }} crédits</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Informations utilisateurs -->
+                        <div class="lg:text-right">
+                            <!-- Utilisateur qui a donné l'avis -->
+                            <div class="mb-4">
+                                <p class="text-textSecondary text-sm mb-2">Avis donné par</p>
+                                <div class="flex items-center gap-3 justify-end">
+                                    <div>
+                                        <p class="text-textPrimary font-base">{{ review.author.pseudo }}</p>
+                                        <p class="text-textSecondary text-sm">{{ review.author.email }}</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-sm font-base">
+                                        {% if review.author.avatar %}
+                                            <img src="{{ review.author.avatar }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                        {% else %}
+                                            {{ review.author.pseudo|first|upper }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Utilisateur évalué -->
+                            <div>
+                                <p class="text-textSecondary text-sm mb-2">Évalué</p>
+                                <div class="flex items-center gap-3 justify-end">
+                                    <div>
+                                        <p class="text-textPrimary font-base">{{ review.reviewedUser.pseudo }}</p>
+                                        <p class="text-textSecondary text-sm">{{ review.reviewedUser.email }}</p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-sm font-base">
+                                        {% if review.reviewedUser.avatar %}
+                                            <img src="{{ review.reviewedUser.avatar }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                                        {% else %}
+                                            {{ review.reviewedUser.pseudo|first|upper }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if totalPages > 1 %}
+        <div class="flex justify-center mt-8">
+            <nav class="flex items-center gap-2">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('employe_all_reviews', {page: currentPage - 1}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                        Précédent
+                    </a>
+                {% endif %}
+                
+                {% for page in 1..totalPages %}
+                    {% if page == currentPage %}
+                        <span class="px-4 py-2 bg-accent text-white rounded-lg">{{ page }}</span>
+                    {% else %}
+                        <a href="{{ path('employe_all_reviews', {page: page}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('employe_all_reviews', {page: currentPage + 1}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                        Suivant
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

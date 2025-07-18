@@ -1,0 +1,145 @@
+{% extends 'employe/base.html.twig' %}
+
+{% block title %}Tous les voyages{% endblock %}
+
+{% block employe_content %}
+<div class="space-y-6">
+    <!-- En-tête de bienvenue -->
+    <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+        <h1 class="text-title font-title text-textPrimary mb-2">Tous les voyages</h1>
+        <p class="text-lg text-textSecondary">{{ totalRides }} voyage(s) au total</p>
+    </div>
+
+    <!-- Liste des voyages -->
+    <div class="space-y-4">
+        {% if rides is empty %}
+            <div class="text-center py-12">
+                <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                <p class="text-textSecondary">Aucun voyage trouvé</p>
+            </div>
+        {% else %}
+            {% for ride in rides %}
+                <div class="bg-gradient-to-br from-secondary/70 to-secondary/90 backdrop-blur-xl border border-white/30 rounded-2xl p-6 shadow-xl">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <!-- Informations principales -->
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <h3 class="text-lg font-title text-textPrimary">
+                                    {{ ride.departure }} → {{ ride.arrival }}
+                                </h3>
+                                {% if ride.isEcological %}
+                                    <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
+                                        🌱 Écologique
+                                    </span>
+                                {% endif %}
+                                <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : 'yellow' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : 'yellow' }}-400 text-xs rounded-full">
+                                    {{ ride.status|upper }}
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <p class="text-textSecondary">Date</p>
+                                    <p class="text-textPrimary font-base">{{ ride.date|date('d/m/Y') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-textSecondary">Heure départ</p>
+                                    <p class="text-textPrimary font-base">{{ ride.departureTime|date('H:i') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-textSecondary">Prix</p>
+                                    <p class="text-textPrimary font-base">{{ ride.price }} crédits</p>
+                                </div>
+                                <div>
+                                    <p class="text-textSecondary">Places disponibles</p>
+                                    <p class="text-textPrimary font-base">{{ ride.availableSeats }}/{{ ride.vehicle ? ride.vehicle.seats : 'N/A' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Informations conducteur -->
+                        <div class="lg:text-right">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-sm font-base">
+                                    {% if ride.driver.avatar %}
+                                        <img src="{{ ride.driver.avatar }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                    {% else %}
+                                        {{ ride.driver.pseudo|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-textPrimary font-base">{{ ride.driver.pseudo }}</p>
+                                    <p class="text-textSecondary text-sm">{{ ride.driver.email }}</p>
+                                </div>
+                            </div>
+                            
+                            {% if ride.vehicle %}
+                                <div class="text-sm">
+                                    <p class="text-textSecondary">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</p>
+                                    <p class="text-textSecondary">{{ ride.vehicle.energy }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Participants -->
+                    {% if ride.participations is not empty %}
+                        <div class="mt-4 pt-4 border-t border-white/20">
+                            <p class="text-textSecondary text-sm mb-2">Participants ({{ ride.participations|length }})</p>
+                            <div class="flex flex-wrap gap-2">
+                                {% for participation in ride.participations %}
+                                    <div class="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
+                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-xs">
+                                            {% if participation.user.avatar %}
+                                                <img src="{{ participation.user.avatar }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover">
+                                            {% else %}
+                                                {{ participation.user.pseudo|first|upper }}
+                                            {% endif %}
+                                        </div>
+                                        <span class="text-textPrimary text-sm">{{ participation.user.pseudo }}</span>
+                                        <span class="px-2 py-0.5 bg-{{ participation.status == 'acceptee' ? 'green' : participation.status == 'en_attente' ? 'yellow' : 'red' }}-500/20 text-{{ participation.status == 'acceptee' ? 'green' : participation.status == 'en_attente' ? 'yellow' : 'red' }}-400 text-xs rounded-full">
+                                            {{ participation.status|upper }}
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if totalPages > 1 %}
+        <div class="flex justify-center mt-8">
+            <nav class="flex items-center gap-2">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('employe_all_rides', {page: currentPage - 1}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                        Précédent
+                    </a>
+                {% endif %}
+                
+                {% for page in 1..totalPages %}
+                    {% if page == currentPage %}
+                        <span class="px-4 py-2 bg-accent text-white rounded-lg">{{ page }}</span>
+                    {% else %}
+                        <a href="{{ path('employe_all_rides', {page: page}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('employe_all_rides', {page: currentPage + 1}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
+                        Suivant
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

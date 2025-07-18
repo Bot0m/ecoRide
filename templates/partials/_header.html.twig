@@ -66,6 +66,17 @@
                 <li>
                   <a href="{{ path('admin_users') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Gestion utilisateurs</a>
                 </li>
+              {% elseif is_granted('ROLE_EMPLOYE') %}
+                {# Options pour les employés #}
+                <li>
+                  <a href="{{ path('employe_dashboard') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Espace Employé</a>
+                </li>
+                <li>
+                  <a href="{{ path('employe_all_rides') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Tous les voyages</a>
+                </li>
+                <li>
+                  <a href="{{ path('employe_all_reviews') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Les avis</a>
+                </li>
               {% else %}
                 {# Options pour les utilisateurs standards uniquement #}
                 <li>
@@ -80,7 +91,6 @@
                 <li>
                   <a href="{{ path('profile') }}" class="nav-link block px-4 py-2 text-body font-base text-textSecondary rounded-lg transition-all duration-300 hover:text-accent">Mes informations</a>
                 </li>
-
               {% endif %}
               
               {# Séparateur visuel #}
