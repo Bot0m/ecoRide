@@ -13,6 +13,7 @@ use App\Entity\User;
 use App\Entity\Preference;
 use App\Entity\Ride;
 use App\Entity\Participation;
+use App\Entity\Notification;
 use App\Form\RideType;
 use App\Repository\RideRepository;
 use App\Repository\ParticipationRepository;
@@ -20,7 +21,7 @@ use App\Repository\ParticipationRepository;
 class UserController extends AbstractController
 {
     #[Route('/credit', name: 'credit')]
-    public function index(RideRepository $rideRepository): Response
+    public function index(RideRepository $rideRepository, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
@@ -30,10 +31,15 @@ class UserController extends AbstractController
         $completedRides = $rideRepository->countCompletedRidesByUser($user);
         $upcomingRides = $rideRepository->countUpcomingRidesByUser($user);
 
+        // Récupération des notifications non lues
+        $notifications = $entityManager->getRepository(Notification::class)
+            ->findBy(['user' => $user, 'isRead' => false], ['createdAt' => 'DESC']);
+
         return $this->render('user/credit.html.twig', [
             'user' => $user,
             'completedRides' => $completedRides,
             'upcomingRides' => $upcomingRides,
+            'notifications' => $notifications,
         ]);
     }
 
@@ -274,19 +280,23 @@ class UserController extends AbstractController
             return $this->redirectToRoute('app_rides_user');
         }
 
-        // Récupération des voyages où l'utilisateur est conducteur
-        $drivenRides = $rideRepository->findBy(['driver' => $user]);
+        // Récupération des voyages où l'utilisateur est conducteur (actifs et annulés pour l'historique)
+        $allDrivenRides = $rideRepository->createQueryBuilder('r')
+            ->where('r.driver = :user')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
         
-        // Récupération des voyages où l'utilisateur est passager (via participations acceptées)
-        $passengerRides = [];
+        // Récupération des voyages où l'utilisateur est passager (via participations acceptées ET annulées)
+        $allPassengerRides = [];
         foreach ($user->getParticipations() as $participation) {
-            if ($participation->getStatus() === 'acceptee') {
-                $passengerRides[] = $participation->getRide();
+            if ($participation->getStatus() === 'acceptee' || $participation->getStatus() === 'annulee') {
+                $allPassengerRides[] = $participation->getRide();
             }
         }
         
         // Fusion et tri de tous les voyages de l'utilisateur
-        $allUserRides = array_merge($drivenRides, $passengerRides);
+        $allUserRides = array_merge($allDrivenRides, $allPassengerRides);
         
         // Tri par date et heure (du plus proche au plus éloigné)
         usort($allUserRides, function($a, $b) {
@@ -312,9 +322,10 @@ class UserController extends AbstractController
         $pastRides = [];
         
         foreach ($allUserRides as $ride) {
-            if ($ride->getDate() >= $today) {
+            if ($ride->getDate() >= $today && $ride->getStatus() === 'actif') {
                 $upcomingRides[] = $ride;
             } else {
+                // Inclure tous les voyages passés ET annulés dans l'historique
                 $pastRides[] = $ride;
             }
         }
@@ -326,8 +337,8 @@ class UserController extends AbstractController
         ]);
     }
 
-    #[Route('/mes-voyages/{id}/supprimer', name: 'app_rides_delete')]
-    public function deleteRide(Ride $ride, EntityManagerInterface $entityManager): Response
+    #[Route('/mes-voyages/{id}/annuler', name: 'app_rides_cancel')]
+    public function cancelRide(Ride $ride, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         
@@ -335,8 +346,80 @@ class UserController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $entityManager->remove($ride);
-        $entityManager->flush();
+        // Vérifier que le voyage n'est pas déjà annulé
+        if ($ride->getStatus() === 'annule') {
+            $this->addFlash('error', 'Ce voyage est déjà annulé.');
+            return $this->redirectToRoute('app_rides_user');
+        }
+
+        try {
+            // Gérer les participations avant d'annuler le voyage
+            $participantsCount = 0;
+            foreach ($ride->getParticipations() as $participation) {
+                if ($participation->getStatus() === 'acceptee') {
+                    $participant = $participation->getUser();
+                    
+                    // Calculer le nombre de places réservées par cette participation
+                    $seatsReserved = $participation->getSeatsCount();
+                    
+                    // Rembourser le participant (prix × nombre de places + commission)
+                    $refundAmount = ($ride->getPrice() * $seatsReserved) + 2; // Prix × places + commission fixe
+                    $participant->setCredits($participant->getCredits() + $refundAmount);
+                    
+                    // Débiter le conducteur du prix qu'il avait reçu
+                    $driver = $ride->getDriver();
+                    $driver->setCredits($driver->getCredits() - ($ride->getPrice() * $seatsReserved));
+                    
+                    // Changer le statut de la participation
+                    $participation->setStatus('annulee');
+                    
+                    // Créer une notification pour le participant
+                    $notification = new Notification();
+                    $notification->setUser($participant);
+                    $notification->setRide($ride);
+                    $notification->setType('ride_cancelled');
+                    $notification->setMessage("Le voyage {$ride->getDeparture()} → {$ride->getArrival()} du {$ride->getDate()->format('d/m/Y')} a été annulé. Vous avez été remboursé de {$refundAmount} crédits.");
+                    $entityManager->persist($notification);
+                    
+                    $participantsCount++;
+                } elseif ($participation->getStatus() === 'en_attente') {
+                    // Pour les demandes en attente, rembourser et changer le statut
+                    $participant = $participation->getUser();
+                    
+                    // Calculer le nombre de places réservées par cette participation
+                    $seatsReserved = $participation->getSeatsCount();
+                    
+                    // Rembourser le participant (prix × nombre de places + commission)
+                    $refundAmount = ($ride->getPrice() * $seatsReserved) + 2; // Prix × places + commission fixe
+                    $participant->setCredits($participant->getCredits() + $refundAmount);
+                    
+                    // Débiter le conducteur du prix qu'il avait reçu
+                    $driver = $ride->getDriver();
+                    $driver->setCredits($driver->getCredits() - ($ride->getPrice() * $seatsReserved));
+                    
+                    // Changer le statut de la participation
+                    $participation->setStatus('annulee');
+                    
+                    // Créer une notification pour le participant
+                    $notification = new Notification();
+                    $notification->setUser($participant);
+                    $notification->setRide($ride);
+                    $notification->setType('ride_cancelled');
+                    $notification->setMessage("Le voyage {$ride->getDeparture()} → {$ride->getArrival()} du {$ride->getDate()->format('d/m/Y')} a été annulé. Vous avez été remboursé de {$refundAmount} crédits.");
+                    $entityManager->persist($notification);
+                    
+                    $participantsCount++;
+                }
+            }
+            
+            // Annuler le voyage
+            $ride->setStatus('annule');
+            
+            $entityManager->flush();
+            
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Erreur lors de l\'annulation du voyage : ' . $e->getMessage());
+        }
 
         return $this->redirectToRoute('app_rides_user');
     }
@@ -368,11 +451,14 @@ class UserController extends AbstractController
             $passenger = $participation->getUser();
             $ride->addPassenger($passenger);
             
+            // Note: Le nombre de places est déjà géré lors de la réservation
+            // et les places ont déjà été retirées du voyage
+            
             $entityManager->flush();
             
             return new JsonResponse([
                 'success' => true,
-                'message' => 'Demande acceptée avec succès ! Le passager a été ajouté à votre trajet.'
+                'message' => 'Demande acceptée ! Le passager a été ajouté à votre trajet.'
             ]);
             
         } catch (\Exception $e) {
@@ -402,29 +488,53 @@ class UserController extends AbstractController
             // Changer le statut de la participation
             $participation->setStatus('refusee');
             
-            // Rembourser l'utilisateur (prix + commission)
+            // Rembourser l'utilisateur (prix × nombre de places + commission)
             $ride = $participation->getRide();
             $passenger = $participation->getUser();
-            $refundAmount = $ride->getPrice() + 2; // Prix + commission
+            $seatsReserved = $participation->getSeatsCount();
+            $refundAmount = ($ride->getPrice() * $seatsReserved) + 2; // Prix × places + commission
             
             $passenger->setCredits($passenger->getCredits() + $refundAmount);
             
             // Débiter le conducteur du prix qu'il avait reçu
             $driver = $ride->getDriver();
-            $driver->setCredits($driver->getCredits() - $ride->getPrice());
+            $driver->setCredits($driver->getCredits() - ($ride->getPrice() * $seatsReserved));
             
-            // Remettre une place disponible
-            $ride->setAvailableSeats($ride->getAvailableSeats() + 1);
+            // Remettre les places disponibles
+            $ride->setAvailableSeats($ride->getAvailableSeats() + $seatsReserved);
             
             $entityManager->flush();
             
             return new JsonResponse([
                 'success' => true,
-                'message' => 'Demande refusée. Le passager a été remboursé de ses crédits.'
+                'message' => 'Demande refusée. Le passager a été remboursé.'
             ]);
             
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Erreur lors du refus : ' . $e->getMessage()], 500);
         }
+    }
+
+    #[Route('/notifications/{id}/read', name: 'notification_mark_read', methods: ['POST'])]
+    public function markNotificationAsRead(Notification $notification, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Vérifier que la notification appartient à l'utilisateur
+        if ($notification->getUser() !== $user) {
+            return new JsonResponse(['error' => 'Notification non trouvée'], 404);
+        }
+
+        // Marquer comme lue
+        $notification->setIsRead(true);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => 'Notification marquée comme lue'
+        ]);
     }
 }

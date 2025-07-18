@@ -7,6 +7,27 @@
         <p class="text-lg text-textSecondary">Bienvenue dans votre espace personnel Ecoride</p>
     </div>
 
+    <!-- Notifications -->
+    {% if notifications is not empty %}
+        <div class="mb-6 space-y-3">
+            {% for notification in notifications %}
+                <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-xl p-4 border border-accent/30 relative" id="notification-{{ notification.id }}">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-textPrimary font-base">{{ notification.message }}</p>
+                            <p class="text-xs text-textSecondary mt-1">{{ notification.createdAt|date('d/m/Y à H:i') }}</p>
+                        </div>
+                        <button onclick="markNotificationAsRead({{ notification.id }})" class="ml-4 text-accent hover:text-accentDark transition-colors duration-300 flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- Carte des crédits -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30">
@@ -200,5 +221,44 @@
                 closeSuccessModal();
             }
         });
+
+        // Fonction pour marquer une notification comme lue
+        async function markNotificationAsRead(notificationId) {
+            try {
+                const response = await fetch(`/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Supprimer la notification de l'affichage avec une animation
+                    const notificationElement = document.getElementById(`notification-${notificationId}`);
+                    if (notificationElement) {
+                        notificationElement.style.transition = 'all 0.3s ease';
+                        notificationElement.style.opacity = '0';
+                        notificationElement.style.transform = 'translateX(100%)';
+                        
+                        setTimeout(() => {
+                            notificationElement.remove();
+                            
+                            // Si plus aucune notification, recharger la page pour masquer la section
+                            const remainingNotifications = document.querySelectorAll('[id^="notification-"]');
+                            if (remainingNotifications.length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                    }
+                } else {
+                    console.error('Erreur:', data.error);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
     </script>
 {% endblock %}

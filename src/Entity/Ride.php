@@ -43,6 +43,9 @@ class Ride
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $createdAt = null;
 
+    #[ORM\Column(type: 'string', length: 20, options: ['default' => 'actif'])]
+    private ?string $status = 'actif';
+
     #[ORM\ManyToOne(inversedBy: 'drivenRides')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $driver = null;
@@ -53,7 +56,7 @@ class Ride
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'ridesAsPassenger')]
     private Collection $passengers;
 
-    #[ORM\ManyToOne(inversedBy: 'rides')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Vehicle $vehicle = null;
 
@@ -179,6 +182,18 @@ class Ride
     public function setCreatedAt(\DateTime $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

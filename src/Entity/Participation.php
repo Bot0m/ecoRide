@@ -39,9 +39,13 @@ class Participation
     #[ORM\Column(type: 'datetime')]
     private ?\DateTime $createdAt = null;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    private int $seatsCount = 1;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
+        $this->seatsCount = 1;
     }
 
     public function getId(): ?int
@@ -141,6 +145,18 @@ class Participation
     public function setCreatedAt(\DateTime $createdAt): static
     {
         $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getSeatsCount(): int
+    {
+        return $this->seatsCount;
+    }
+
+    public function setSeatsCount(int $seatsCount): static
+    {
+        $this->seatsCount = $seatsCount;
 
         return $this;
     }

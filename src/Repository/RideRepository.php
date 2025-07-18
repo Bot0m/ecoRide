@@ -22,9 +22,11 @@ class RideRepository extends ServiceEntityRepository
             ->where('r.departure LIKE :departure')
             ->andWhere('r.arrival LIKE :arrival')
             ->andWhere('r.date = :date')
+            ->andWhere('r.status = :status')
             ->setParameter('departure', '%' . $departure . '%')
             ->setParameter('arrival', '%' . $arrival . '%')
             ->setParameter('date', $date->format('Y-m-d'))
+            ->setParameter('status', 'actif')
             ->orderBy('r.date', 'ASC')
             ->addOrderBy('r.departure', 'ASC')
             ->getQuery()
@@ -33,39 +35,37 @@ class RideRepository extends ServiceEntityRepository
 
     public function findMatchingRidesWithFallback(string $departure, string $arrival, \DateTimeInterface $date): array
     {
-        // Rechercher d'abord pour la date exacte
-        $exactResults = $this->findMatchingRides($departure, $arrival, $date);
-        
-        if (!empty($exactResults)) {
-            return [
-                'rides' => $exactResults,
-                'isAlternative' => false,
-                'searchedDate' => $date
-            ];
-        }
-        
-        // Si aucun résultat pour la date exacte, chercher les 7 jours suivants
-        $startDate = (new \DateTimeImmutable($date->format('Y-m-d')))->modify('+1 day');
-        $endDate = (new \DateTimeImmutable($date->format('Y-m-d')))->modify('+7 days');
-        
-        $alternativeResults = $this->createQueryBuilder('r')
+        // Recherche exacte
+        $exactMatches = $this->createQueryBuilder('r')
             ->where('r.departure LIKE :departure')
             ->andWhere('r.arrival LIKE :arrival')
-            ->andWhere('r.date >= :startDate AND r.date <= :endDate')
+            ->andWhere('r.date = :date')
+            ->andWhere('r.status = :status')
             ->setParameter('departure', '%' . $departure . '%')
             ->setParameter('arrival', '%' . $arrival . '%')
-            ->setParameter('startDate', $startDate->format('Y-m-d'))
-            ->setParameter('endDate', $endDate->format('Y-m-d'))
+            ->setParameter('date', $date->format('Y-m-d'))
+            ->setParameter('status', 'actif')
             ->orderBy('r.date', 'ASC')
-            ->addOrderBy('r.departureTime', 'ASC')
+            ->addOrderBy('r.departure', 'ASC')
             ->getQuery()
             ->getResult();
-        
-        return [
-            'rides' => $alternativeResults,
-            'isAlternative' => !empty($alternativeResults),
-            'searchedDate' => $date
-        ];
+
+        if (!empty($exactMatches)) {
+            return ['rides' => $exactMatches, 'type' => 'exact'];
+        }
+
+        // Recherche par date seulement
+        $dateMatches = $this->createQueryBuilder('r')
+            ->where('r.date = :date')
+            ->andWhere('r.status = :status')
+            ->setParameter('date', $date->format('Y-m-d'))
+            ->setParameter('status', 'actif')
+            ->orderBy('r.date', 'ASC')
+            ->addOrderBy('r.departure', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return ['rides' => $dateMatches, 'type' => 'date_only'];
     }
 
     public function findUpcomingRides(): array
@@ -76,8 +76,10 @@ class RideRepository extends ServiceEntityRepository
         
         return $this->createQueryBuilder('r')
             ->where('r.date > :today OR (r.date = :today AND r.departureTime > :currentTime)')
+            ->andWhere('r.status = :status')
             ->setParameter('today', $today->format('Y-m-d'))
             ->setParameter('currentTime', $currentTime)
+            ->setParameter('status', 'actif')
             ->orderBy('r.date', 'ASC')
             ->addOrderBy('r.departureTime', 'ASC')
             ->getQuery()
@@ -143,26 +145,30 @@ class RideRepository extends ServiceEntityRepository
     {
         $today = new \DateTimeImmutable('today');
         
-        // Compter les voyages passés où l'utilisateur est conducteur
+        // Compter les voyages passés où l'utilisateur est conducteur (seulement les voyages actifs)
         $drivenCount = $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->where('r.driver = :user')
             ->andWhere('r.date < :today')
+            ->andWhere('r.status = :status')
             ->setParameter('user', $user)
             ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('status', 'actif')
             ->getQuery()
             ->getSingleScalarResult();
 
-        // Compter les voyages passés où l'utilisateur est passager
+        // Compter les voyages passés où l'utilisateur est passager (seulement les voyages actifs)
         $passengerCount = $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->join('r.participations', 'p')
             ->where('p.user = :user')
             ->andWhere('p.status = :status')
             ->andWhere('r.date < :today')
+            ->andWhere('r.status = :rideStatus')
             ->setParameter('user', $user)
             ->setParameter('status', 'acceptee')
             ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('rideStatus', 'actif')
             ->getQuery()
             ->getSingleScalarResult();
 
@@ -173,26 +179,30 @@ class RideRepository extends ServiceEntityRepository
     {
         $today = new \DateTimeImmutable('today');
         
-        // Compter les voyages futurs où l'utilisateur est conducteur
+        // Compter les voyages futurs où l'utilisateur est conducteur (seulement les voyages actifs)
         $drivenCount = $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->where('r.driver = :user')
             ->andWhere('r.date >= :today')
+            ->andWhere('r.status = :status')
             ->setParameter('user', $user)
             ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('status', 'actif')
             ->getQuery()
             ->getSingleScalarResult();
 
-        // Compter les voyages futurs où l'utilisateur est passager
+        // Compter les voyages futurs où l'utilisateur est passager (seulement les voyages actifs)
         $passengerCount = $this->createQueryBuilder('r')
             ->select('COUNT(r.id)')
             ->join('r.participations', 'p')
             ->where('p.user = :user')
             ->andWhere('p.status = :status')
             ->andWhere('r.date >= :today')
+            ->andWhere('r.status = :rideStatus')
             ->setParameter('user', $user)
             ->setParameter('status', 'acceptee')
             ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('rideStatus', 'actif')
             ->getQuery()
             ->getSingleScalarResult();
 

@@ -38,11 +38,16 @@ class RideController extends AbstractController
 
         // Récupérer les participations de l'utilisateur connecté pour afficher le bon état des boutons
         $userParticipations = [];
+        $userParticipationsDetails = [];
         if ($this->getUser()) {
             /** @var User $user */
             $user = $this->getUser();
             foreach ($user->getParticipations() as $participation) {
                 $userParticipations[$participation->getRide()->getId()] = $participation->getStatus();
+                $userParticipationsDetails[$participation->getRide()->getId()] = [
+                    'status' => $participation->getStatus(),
+                    'seatsCount' => $participation->getSeatsCount()
+                ];
             }
         }
 
@@ -52,6 +57,7 @@ class RideController extends AbstractController
             'search' => compact('departure', 'arrival', 'date'),
             'searchResult' => $searchResult,
             'userParticipations' => $userParticipations,
+            'userParticipationsDetails' => $userParticipationsDetails,
         ]);
     }
 
@@ -63,6 +69,11 @@ class RideController extends AbstractController
         $user = $this->getUser();
         if (!$user) {
             return new JsonResponse(['error' => 'Vous devez être connecté pour réserver un trajet'], 401);
+        }
+
+        // Vérifier que le voyage n'est pas annulé
+        if ($ride->getStatus() !== 'actif') {
+            return new JsonResponse(['error' => 'Ce voyage n\'est plus disponible'], 400);
         }
 
         // Récupérer le nombre de places demandées
@@ -111,6 +122,7 @@ class RideController extends AbstractController
             $participation->setStatus('en_attente'); // En attente de validation du conducteur
             $participation->setHasGivenReview(false);
             $participation->setTripValidated(false);
+            $participation->setSeatsCount($seatsRequested); // Définir le nombre de places réservées
 
             // Débiter les crédits de l'utilisateur
             $user->setCredits($user->getCredits() - $requiredCredits);
@@ -129,7 +141,7 @@ class RideController extends AbstractController
             $seatsText = $seatsRequested > 1 ? "{$seatsRequested} places" : "1 place";
             return new JsonResponse([
                 'success' => true,
-                'message' => "Réservation de {$seatsText} effectuée avec succès ! Votre demande est en attente de validation par le conducteur.",
+                'message' => "Réservation de {$seatsText} effectuée ! Votre demande est en attente de validation par le conducteur.",
                 'newCredits' => $user->getCredits()
             ]);
 
@@ -145,15 +157,17 @@ class RideController extends AbstractController
         $driver = $ride->getDriver();
         $vehicle = $ride->getVehicle();
         
-        // Récupérer les participants acceptés
+        // Récupérer les participants acceptés ET annulés (pour l'historique)
         $participants = [];
         foreach ($ride->getParticipations() as $participation) {
-            if ($participation->getStatus() === 'acceptee') {
+            if ($participation->getStatus() === 'acceptee' || $participation->getStatus() === 'annulee') {
                 $participants[] = [
                     'id' => $participation->getUser()->getId(),
                     'pseudo' => $participation->getUser()->getPseudo(),
                     'avatar' => $participation->getUser()->getAvatar(),
                     'userType' => $participation->getUser()->getUserType(),
+                    'status' => $participation->getStatus(), // Ajouter le statut pour différencier
+                    'seatsCount' => $participation->getSeatsCount(), // Ajouter le nombre de places
                 ];
             }
         }

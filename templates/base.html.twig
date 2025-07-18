@@ -42,21 +42,32 @@
                     const content = document.getElementById('rideDetailsContent');
                     
                     // Générer la liste des participants
-                    const participantsList = ride.participants.map(participant => `
-                        <div class="flex items-center gap-3 p-2 bg-white/10 rounded-lg">
-                            <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
-                                ${participant.avatar ? 
-                                    `<img src="${participant.avatar}" alt="${participant.pseudo}" class="w-8 h-8 rounded-full object-cover">` :
-                                    `<svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>`
-                                }
+                    const participantsList = ride.participants.map(participant => {
+                        const statusBadge = participant.status === 'annulee' ? 
+                            '<span class="text-red-400 text-xs px-2 py-1 rounded-full bg-red-500/10 border border-red-400/30 ml-2">Annulé</span>' : '';
+                        
+                        const seatsText = participant.seatsCount > 1 ? 
+                            `<span class="text-xs text-textSecondary ml-2">${participant.seatsCount} places</span>` : 
+                            `<span class="text-xs text-textSecondary ml-2">1 place</span>`;
+                        
+                        return `
+                            <div class="flex items-center gap-3 p-2 bg-white/10 rounded-lg">
+                                <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                                    ${participant.avatar ? 
+                                        `<img src="${participant.avatar}" alt="${participant.pseudo}" class="w-8 h-8 rounded-full object-cover">` :
+                                        `<svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>`
+                                    }
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-base text-textPrimary">${participant.pseudo}</p>
+                                </div>
+                                ${seatsText}
+                                ${statusBadge}
                             </div>
-                            <div>
-                                <p class="text-sm font-base text-textPrimary">${participant.pseudo}</p>
-                            </div>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
 
                     content.innerHTML = `
                         <div class="max-h-[80vh] overflow-y-auto">
@@ -183,6 +194,77 @@
                         });
                     }
                 });
+
+                // Fonction pour afficher une notification en pop-up
+                function showNotification(message, type = 'info') {
+                    const container = document.getElementById('notificationContainer');
+                    const notification = document.createElement('div');
+                    
+                    // Classes selon le type
+                    let bgClass, textClass, iconClass, iconPath;
+                    switch(type) {
+                        case 'success':
+                            bgClass = 'bg-green-500/20 border-green-400/30';
+                            textClass = 'text-green-300';
+                            iconClass = 'text-green-400';
+                            iconPath = 'M5 13l4 4L19 7';
+                            break;
+                        case 'error':
+                            bgClass = 'bg-red-500/20 border-red-400/30';
+                            textClass = 'text-red-300';
+                            iconClass = 'text-red-400';
+                            iconPath = 'M6 18L18 6M6 6l12 12';
+                            break;
+                        case 'warning':
+                            bgClass = 'bg-orange-500/20 border-orange-400/30';
+                            textClass = 'text-orange-300';
+                            iconClass = 'text-orange-400';
+                            iconPath = 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z';
+                            break;
+                        default:
+                            bgClass = 'bg-accent/20 border-accent/30';
+                            textClass = 'text-accent';
+                            iconClass = 'text-accent';
+                            iconPath = 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+                    }
+                    
+                    notification.className = `${bgClass} border rounded-lg p-4 backdrop-blur-sm max-w-sm transform transition-all duration-300 translate-x-full`;
+                    notification.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 ${iconClass} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"/>
+                            </svg>
+                            <span class="${textClass} text-sm">${message}</span>
+                            <button onclick="this.parentElement.parentElement.remove()" class="ml-auto text-gray-400 hover:text-gray-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(notification);
+                    
+                    // Animation d'entrée
+                    setTimeout(() => {
+                        notification.classList.remove('translate-x-full');
+                    }, 100);
+                    
+                    // Auto-suppression après 5 secondes
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.classList.add('translate-x-full');
+                            setTimeout(() => {
+                                if (notification.parentElement) {
+                                    notification.remove();
+                                }
+                            }, 300);
+                        }
+                    }, 5000);
+                }
+
+                // Fonction globale pour afficher les notifications
+                window.showNotification = showNotification;
             </script>
         {% endblock %}
     </head>
@@ -214,6 +296,11 @@
                 <!-- Le contenu sera chargé dynamiquement -->
             </div>
         </div>
+    </div>
+
+    <!-- Système de notifications en pop-up -->
+    <div id="notificationContainer" class="fixed top-4 right-4 z-[80] space-y-2">
+        <!-- Les notifications apparaîtront ici -->
     </div>
 
 </body>
