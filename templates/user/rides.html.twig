@@ -54,7 +54,7 @@
                                     <div class="flex items-center gap-2 mb-1">
                                         <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
                                         {% if ride.isEcological %}
-                                        <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                        <span class="bg-green-500/20 text-textSecondary text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
                                             🌱 ÉCO
                                         </span>
                                         {% endif %}
@@ -105,6 +105,16 @@
                                     </span>
                                 </div>
                             {% endif %}
+                        </div>
+                        
+                        <!-- Lien "En savoir plus" -->
+                        <div class="mt-4 pt-4 border-t border-accent/30">
+                            <button onclick="openRideDetailsModal({{ ride.id }})" class="inline-flex items-center text-accent hover:text-accentDark font-base transition-colors duration-300">
+                                En savoir plus
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
                         </div>
                         
                         <!-- Demandes de réservation (si conducteur) -->
@@ -175,7 +185,7 @@
                                     <div class="flex items-center gap-2 mb-1">
                                         <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
                                         {% if ride.isEcological %}
-                                        <span class="bg-green-500/20 text-green-600 text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                        <span class="bg-green-500/20 text-textSecondary text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
                                             🌱 ÉCO
                                         </span>
                                         {% endif %}
@@ -209,6 +219,16 @@
                                 <span class="text-body text-textSecondary">Arrivée</span>
                                 <span class="text-body font-base text-textPrimary">{{ ride.arrivalTime|date('H:i') }}</span>
                             </div>
+                        </div>
+                        
+                        <!-- Lien "En savoir plus" -->
+                        <div class="mt-4 pt-4 border-t border-backgroundDark/30">
+                            <button onclick="openRideDetailsModal({{ ride.id }})" class="inline-flex items-center text-accent hover:text-accentDark font-base transition-colors duration-300">
+                                En savoir plus
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 {% endfor %}

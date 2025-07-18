@@ -137,4 +137,68 @@ class RideController extends AbstractController
             return new JsonResponse(['error' => 'Erreur lors de la réservation : ' . $e->getMessage()], 500);
         }
     }
+
+    #[Route('/ride/{id}/details', name: 'app_ride_details', methods: ['GET'])]
+    public function getRideDetails(Ride $ride): JsonResponse
+    {
+
+        $driver = $ride->getDriver();
+        $vehicle = $ride->getVehicle();
+        
+        // Récupérer les participants acceptés
+        $participants = [];
+        foreach ($ride->getParticipations() as $participation) {
+            if ($participation->getStatus() === 'acceptee') {
+                $participants[] = [
+                    'id' => $participation->getUser()->getId(),
+                    'pseudo' => $participation->getUser()->getPseudo(),
+                    'avatar' => $participation->getUser()->getAvatar(),
+                    'userType' => $participation->getUser()->getUserType(),
+                ];
+            }
+        }
+
+        // Calculer la note moyenne du conducteur (par défaut 5/5)
+        $driverRating = 5.0;
+        $totalReviews = count($driver->getReviewsReceived());
+        if ($totalReviews > 0) {
+            $totalRating = 0;
+            foreach ($driver->getReviewsReceived() as $review) {
+                $totalRating += $review->getRating();
+            }
+            $driverRating = round($totalRating / $totalReviews, 1);
+        }
+
+        $rideDetails = [
+            'id' => $ride->getId(),
+            'departure' => $ride->getDeparture(),
+            'arrival' => $ride->getArrival(),
+            'date' => $ride->getDate()->format('d/m/Y'),
+            'departureTime' => $ride->getDepartureTime()->format('H:i'),
+            'arrivalTime' => $ride->getArrivalTime()->format('H:i'),
+            'price' => $ride->getPrice(),
+            'availableSeats' => $ride->getAvailableSeats(),
+            'isEcological' => $ride->isEcological(),
+            'driver' => [
+                'id' => $driver->getId(),
+                'pseudo' => $driver->getPseudo(),
+                'avatar' => $driver->getAvatar(),
+                'bio' => $driver->getBio(),
+                'userType' => $driver->getUserType(),
+                'rating' => $driverRating,
+                'totalReviews' => $totalReviews,
+            ],
+            'vehicle' => [
+                'brand' => $vehicle->getBrand(),
+                'model' => $vehicle->getModel(),
+                'color' => $vehicle->getColor(),
+                'energy' => $vehicle->getEnergy(),
+                'seats' => $vehicle->getSeats(),
+            ],
+            'participants' => $participants,
+            'participantsCount' => count($participants),
+        ];
+
+        return new JsonResponse($rideDetails);
+    }
 }

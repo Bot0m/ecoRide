@@ -9,6 +9,181 @@
 
         {% block javascripts %}
             {% block importmap %}{{ importmap('app') }}{% endblock %}
+            
+            <script>
+                // Fonction pour ouvrir le modal de détails d'un voyage
+                function openRideDetailsModal(rideId) {
+                    // Afficher le modal de chargement
+                    document.getElementById('rideDetailsModal').classList.remove('hidden');
+                    document.getElementById('rideDetailsContent').innerHTML = `
+                        <div class="flex items-center justify-center p-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+                        </div>
+                    `;
+
+                    // Récupérer les détails du voyage
+                    fetch(`/ride/${rideId}/details`)
+                        .then(response => response.json())
+                        .then(data => {
+                            displayRideDetails(data);
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            document.getElementById('rideDetailsContent').innerHTML = `
+                                <div class="text-center p-8">
+                                    <p class="text-red-400">Erreur lors du chargement des détails</p>
+                                </div>
+                            `;
+                        });
+                }
+
+                // Fonction pour afficher les détails du voyage
+                function displayRideDetails(ride) {
+                    const content = document.getElementById('rideDetailsContent');
+                    
+                    // Générer la liste des participants
+                    const participantsList = ride.participants.map(participant => `
+                        <div class="flex items-center gap-3 p-2 bg-white/10 rounded-lg">
+                            <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                                ${participant.avatar ? 
+                                    `<img src="${participant.avatar}" alt="${participant.pseudo}" class="w-8 h-8 rounded-full object-cover">` :
+                                    `<svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>`
+                                }
+                            </div>
+                            <div>
+                                <p class="text-sm font-base text-textPrimary">${participant.pseudo}</p>
+                            </div>
+                        </div>
+                    `).join('');
+
+                    content.innerHTML = `
+                        <div class="max-h-[80vh] overflow-y-auto">
+                            <!-- En-tête du voyage -->
+                            <div class="text-center mb-6">
+                                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Détails du voyage</h3>
+                                <div class="flex items-center justify-center gap-2 mb-2">
+                                    <span class="text-lg font-base text-background">${ride.departure}</span>
+                                    <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                    </svg>
+                                    <span class="text-lg font-base text-background">${ride.arrival}</span>
+                                </div>
+                                <p class="text-background">${ride.date} à ${ride.departureTime}</p>
+                                ${ride.isEcological ? '<span class="inline-block bg-green-500/20 text-textSecondary text-xs px-2 py-1 rounded-full font-base border border-green-400/30 mt-2">🌱 ÉCO</span>' : ''}
+                            </div>
+
+                            <!-- Informations du conducteur -->
+                            <div class="bg-white/10 rounded-xl p-4 mb-4">
+                                <h4 class="text-body font-base text-backgroundDark mb-3">Conducteur</h4>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                                        ${ride.driver.avatar ? 
+                                            `<img src="${ride.driver.avatar}" alt="${ride.driver.pseudo}" class="w-16 h-16 rounded-full object-cover">` :
+                                            `<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>`
+                                        }
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h5 class="text-body font-base text-backgroundDark">${ride.driver.pseudo}</h5>
+                                        </div>
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-sm font-base text-background">${ride.driver.rating}/5</span>
+                                            <button onclick="openReviewsModal(${ride.driver.id})" class="text-xs text-accent hover:text-accentDark transition-colors duration-300">
+                                                (${ride.driver.totalReviews} avis)
+                                            </button>
+                                        </div>
+                                        ${ride.driver.bio ? `<p class="text-sm text-background">${ride.driver.bio}</p>` : '<p class="text-sm text-textSecondary">Aucune bio disponible</p>'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations du véhicule -->
+                            <div class="bg-white/10 rounded-xl p-4 mb-4">
+                                <h4 class="text-body font-base text-backgroundDark mb-3">Véhicule</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Modèle</p>
+                                        <p class="text-sm font-base text-background">${ride.vehicle.brand} ${ride.vehicle.model}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Couleur</p>
+                                        <p class="text-sm font-base text-background">${ride.vehicle.color}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Énergie</p>
+                                        <p class="text-sm font-base text-background">${ride.vehicle.energy}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Places</p>
+                                        <p class="text-sm font-base text-background">${ride.vehicle.seats} places</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations du voyage -->
+                            <div class="bg-white/10 rounded-xl p-4 mb-4">
+                                <h4 class="text-body font-base text-backgroundDark mb-3">Informations du voyage</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Prix</p>
+                                        <p class="text-sm font-base text-background">${ride.price} crédits</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Places disponibles</p>
+                                        <p class="text-sm font-base text-background">${ride.availableSeats} places</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Départ</p>
+                                        <p class="text-sm font-base text-background">${ride.departureTime}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-textSecondary">Arrivée estimée</p>
+                                        <p class="text-sm font-base text-background">${ride.arrivalTime}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Liste des participants -->
+                            <div class="bg-white/10 rounded-xl p-4">
+                                <h4 class="text-body font-base text-backgroundDark mb-3">Participants (${ride.participantsCount})</h4>
+                                ${ride.participantsCount > 0 ? 
+                                    `<div class="space-y-2">${participantsList}</div>` :
+                                    '<p class="text-sm text-textSecondary">Aucun participant pour le moment</p>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                }
+
+
+
+                // Fonction pour fermer le modal
+                function closeRideDetailsModal() {
+                    document.getElementById('rideDetailsModal').classList.add('hidden');
+                }
+
+                // Fonction pour ouvrir le modal des avis (à implémenter plus tard)
+                function openReviewsModal(userId) {
+                    // TODO: Implémenter le modal des avis
+                    console.log('Ouvrir les avis pour l\'utilisateur:', userId);
+                }
+
+                // Fermer le modal en cliquant en dehors
+                document.addEventListener('DOMContentLoaded', function() {
+                    const modal = document.getElementById('rideDetailsModal');
+                    if (modal) {
+                        modal.addEventListener('click', function(e) {
+                            if (e.target === this) {
+                                closeRideDetailsModal();
+                            }
+                        });
+                    }
+                });
+            </script>
         {% endblock %}
     </head>
     <body class="flex flex-col min-h-screen bg-background text-textPrimary font-[Quicksand]">
@@ -23,5 +198,23 @@
         {% include 'partials/_footer.html.twig' %}
         {% include 'partials/_contact_drawer.html.twig' %}
         <script src="{{ asset('build/flowbite.min.js') }}"></script>
-    </body>
+
+    <!-- Modal de détails des voyages -->
+    <div id="rideDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 max-w-2xl w-full max-h-[90vh] transform transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-subtitle font-title text-backgroundDark">Détails du voyage</h3>
+                <button onclick="closeRideDetailsModal()" class="text-backgroundDark hover:text-background transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="rideDetailsContent">
+                <!-- Le contenu sera chargé dynamiquement -->
+            </div>
+        </div>
+    </div>
+
+</body>
 </html>
