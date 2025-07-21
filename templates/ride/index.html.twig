@@ -97,7 +97,9 @@
                                 </svg>
                                 <div class="text-left">
                                     <p class="text-accent text-sm">
-                                        Aucun trajet trouvé pour le {{ searchResult.searchedDate|date('d/m/Y') }}.<br>
+                                        {% if searchResult.searchedDate %}
+                                            Aucun trajet trouvé pour le {{ searchResult.searchedDate|date('d/m/Y') }}.<br>
+                                        {% endif %}
                                         <span class="text-xs opacity-80">Voici les trajets disponibles dans les jours suivants :</span>
                                     </p>
                                 </div>

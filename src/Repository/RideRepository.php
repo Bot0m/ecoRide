@@ -51,7 +51,12 @@ class RideRepository extends ServiceEntityRepository
             ->getResult();
 
         if (!empty($exactMatches)) {
-            return ['rides' => $exactMatches, 'type' => 'exact'];
+            return [
+                'rides' => $exactMatches, 
+                'type' => 'exact',
+                'isAlternative' => false,
+                'searchedDate' => $date
+            ];
         }
 
         // Recherche par date seulement
@@ -65,7 +70,12 @@ class RideRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
-        return ['rides' => $dateMatches, 'type' => 'date_only'];
+        return [
+            'rides' => $dateMatches, 
+            'type' => 'date_only',
+            'isAlternative' => true,
+            'searchedDate' => $date
+        ];
     }
 
     public function findUpcomingRides(): array

@@ -23,7 +23,12 @@ class RideController extends AbstractController
         $date = $request->query->get('date');
 
         $ridesMatchingSearch = [];
-        $searchResult = [];
+        $searchResult = [
+            'rides' => [],
+            'type' => null,
+            'isAlternative' => false,
+            'searchedDate' => null
+        ];
         if ($departure && $arrival && $date) {
             try {
                 $dateObj = new \DateTimeImmutable($date);
