@@ -35,8 +35,8 @@
                                         🌱 Écologique
                                     </span>
                                 {% endif %}
-                                <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : 'yellow' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : 'yellow' }}-400 text-xs rounded-full">
-                                    {{ ride.status|upper }}
+                                <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400 text-xs rounded-full">
+                                    {{ ride.status == 'actif' ? 'ACTIF' : ride.status == 'annule' ? 'ANNULÉ' : ride.status == 'en_cours' ? 'EN COURS' : 'TERMINÉ' }}
                                 </span>
                             </div>
                             

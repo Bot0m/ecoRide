@@ -46,6 +46,12 @@ class Ride
     #[ORM\Column(type: 'string', length: 20, options: ['default' => 'actif'])]
     private ?string $status = 'actif';
 
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTime $startedAt = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTime $completedAt = null;
+
     #[ORM\ManyToOne(inversedBy: 'drivenRides')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $driver = null;
@@ -194,6 +200,30 @@ class Ride
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getStartedAt(): ?\DateTime
+    {
+        return $this->startedAt;
+    }
+
+    public function setStartedAt(?\DateTime $startedAt): static
+    {
+        $this->startedAt = $startedAt;
+
+        return $this;
+    }
+
+    public function getCompletedAt(): ?\DateTime
+    {
+        return $this->completedAt;
+    }
+
+    public function setCompletedAt(?\DateTime $completedAt): static
+    {
+        $this->completedAt = $completedAt;
 
         return $this;
     }

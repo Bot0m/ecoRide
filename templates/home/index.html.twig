@@ -9,6 +9,22 @@
 
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
         <!-- Carte glassmorphique horizontale -->
+        <!-- Section Trajets du jour -->
+        {% if app.user and todayRides|length > 0 %}
+            <div class="w-full max-w-6xl backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 mb-6">
+                <h2 class="text-xl font-title text-textPrimary mb-4 text-center">Vos trajets du jour</h2>
+                <div class="grid gap-4">
+                    {% for ride in todayRides %}
+                        {% include 'partials/_ride_card.html.twig' with {
+                            'ride': ride,
+                            'userParticipations': userParticipations,
+                            'showTodayActions': true
+                        } %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
         <div class="w-full max-w-6xl backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 mb-6">
             <form method="get" action="{{ path('app_rides') }}" class="flex flex-wrap justify-center gap-2 md:gap-4">
                 <div class="relative">
@@ -172,6 +188,46 @@
     </div>
 </section>
 #}
+<!-- Modal de confirmation pour démarrer un trajet -->
+<div id="startRideModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center">
+    <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+        <div class="text-center">
+            <h3 class="text-subtitle font-title text-backgroundDark mb-2">Démarrer le trajet</h3>
+            <p class="text-background mb-6" id="startRideText">
+                Êtes-vous sûr de vouloir démarrer ce trajet ?
+            </p>
+            <div class="flex gap-4 justify-center">
+                <button id="confirmStartRideBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-6 rounded-xl transition-all duration-300">
+                    Oui, démarrer
+                </button>
+                <button id="cancelStartRideBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation pour terminer un trajet -->
+<div id="completeRideModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center">
+    <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+        <div class="text-center">
+            <h3 class="text-subtitle font-title text-backgroundDark mb-2">Terminer le trajet</h3>
+            <p class="text-background mb-6" id="completeRideText">
+                Êtes-vous sûr d'avoir terminé ce trajet ?
+            </p>
+            <div class="flex gap-4 justify-center">
+                <button id="confirmCompleteRideBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-6 rounded-xl transition-all duration-300">
+                    Oui, terminer
+                </button>
+                <button id="cancelCompleteRideBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {{ importmap('city-autocomplete') }}
 
@@ -203,6 +259,100 @@ document.addEventListener('DOMContentLoaded', function() {
         new CityAutocomplete('home-departure', 'home-departure-suggestions');
         new CityAutocomplete('home-arrival', 'home-arrival-suggestions');
     }
+});
+
+let rideToStart = null;
+let rideToComplete = null;
+
+// Fonctions pour gérer les trajets
+function startRide(rideId) {
+    rideToStart = rideId;
+    document.getElementById('startRideModal').classList.remove('hidden');
+}
+
+function completeRide(rideId) {
+    rideToComplete = rideId;
+    document.getElementById('completeRideModal').classList.remove('hidden');
+}
+
+// Gestionnaires d'événements pour les modals
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmStartRideBtn').addEventListener('click', function() {
+        if (rideToStart) {
+            fetch(`/ride/${rideToStart}/start`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors du démarrage du trajet');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors du démarrage du trajet');
+            });
+        }
+        document.getElementById('startRideModal').classList.add('hidden');
+        rideToStart = null;
+    });
+
+    document.getElementById('cancelStartRideBtn').addEventListener('click', function() {
+        document.getElementById('startRideModal').classList.add('hidden');
+        rideToStart = null;
+    });
+
+    document.getElementById('confirmCompleteRideBtn').addEventListener('click', function() {
+        if (rideToComplete) {
+            fetch(`/ride/${rideToComplete}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la terminaison du trajet');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la terminaison du trajet');
+            });
+        }
+        document.getElementById('completeRideModal').classList.add('hidden');
+        rideToComplete = null;
+    });
+
+    document.getElementById('cancelCompleteRideBtn').addEventListener('click', function() {
+        document.getElementById('completeRideModal').classList.add('hidden');
+        rideToComplete = null;
+    });
+
+    // Fermer les modals en cliquant en dehors
+    document.getElementById('startRideModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            this.classList.add('hidden');
+            rideToStart = null;
+        }
+    });
+
+    document.getElementById('completeRideModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            this.classList.add('hidden');
+            rideToComplete = null;
+        }
+    });
 });
 </script>
 

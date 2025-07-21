@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Ride;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -217,6 +218,54 @@ class RideRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
 
         return (int)$drivenCount + (int)$passengerCount;
+    }
+
+    public function findTodayRidesForUser(User $user): array
+    {
+        $today = new \DateTimeImmutable('today');
+        
+        // Récupérer les trajets où l'utilisateur est conducteur
+        $drivenRides = $this->createQueryBuilder('r')
+            ->where('r.driver = :user')
+            ->andWhere('r.date = :today')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('user', $user)
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('statuses', ['actif', 'en_cours', 'termine'])
+            ->orderBy('r.departureTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Récupérer les trajets où l'utilisateur est passager (via participations acceptées)
+        $passengerRides = $this->createQueryBuilder('r')
+            ->join('r.participations', 'p')
+            ->where('p.user = :user')
+            ->andWhere('p.status = :participationStatus')
+            ->andWhere('r.date = :today')
+            ->andWhere('r.status IN (:statuses)')
+            ->setParameter('user', $user)
+            ->setParameter('participationStatus', 'acceptee')
+            ->setParameter('today', $today->format('Y-m-d'))
+            ->setParameter('statuses', ['actif', 'en_cours', 'termine'])
+            ->orderBy('r.departureTime', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Fusionner et trier tous les trajets
+        $allRides = array_merge($drivenRides, $passengerRides);
+        
+        // Supprimer les doublons et trier par heure de départ
+        $uniqueRides = [];
+        foreach ($allRides as $ride) {
+            $uniqueRides[$ride->getId()] = $ride;
+        }
+        
+        // Trier par heure de départ
+        usort($uniqueRides, function($a, $b) {
+            return $a->getDepartureTime() <=> $b->getDepartureTime();
+        });
+        
+        return $uniqueRides;
     }
     //    /**
     //     * @return Ride[] Returns an array of Ride objects

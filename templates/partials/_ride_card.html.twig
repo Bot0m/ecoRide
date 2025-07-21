@@ -73,12 +73,30 @@
                             <span class="whitespace-nowrap">En attente</span>
                         </span>
                     {% elseif userParticipationStatus == 'acceptee' %}
-                        <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accent">
-                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            <span class="whitespace-nowrap">Réservé</span>
-                        </span>
+                        {% if ride.status == 'en_cours' %}
+                            <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accent">
+                                <span class="whitespace-nowrap">En cours</span>
+                            </span>
+                        {% elseif ride.status == 'termine' %}
+                            <span class="bg-gray-500 bg-opacity-20 text-gray-400 font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <span class="whitespace-nowrap">Terminé</span>
+                            </span>
+                            {% if showTodayActions is defined and showTodayActions %}
+                                <a href="#" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                    Laisser un avis
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-accent">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                <span class="whitespace-nowrap">Réservé</span>
+                            </span>
+                        {% endif %}
                     {% elseif userParticipationStatus == 'refusee' %}
                         <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base w-full lg:w-auto ring-2 ring-red-500">
                             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,9 +123,29 @@
                         {% endif %}
                     {% endif %}
                 {% elseif ride.driver == app.user %}
-                    <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center">
-                        Votre trajet
-                    </span>
+                    {% if showTodayActions is defined and showTodayActions %}
+                        {% if ride.status == 'actif' %}
+                            <button onclick="startRide({{ ride.id }})" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                Démarrer
+                            </button>
+                        {% elseif ride.status == 'en_cours' %}
+                            <button onclick="completeRide({{ ride.id }})" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                Terminer
+                            </button>
+                        {% elseif ride.status == 'termine' %}
+                            <a href="#" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto">
+                                Laisser un avis
+                            </a>
+                        {% else %}
+                            <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center">
+                                Votre trajet
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <span class="bg-accent bg-opacity-20 text-textSecondary font-base px-4 lg:px-6 py-2 rounded-lg text-sm lg:text-base w-full lg:w-auto text-center">
+                            Votre trajet
+                        </span>
+                    {% endif %}
                 {% else %}
                     {% if ride.availableSeats > 0 %}
                         <a href="{{ path('app_login') }}" class="bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-4 lg:px-6 py-2 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl text-sm lg:text-base w-full lg:w-auto text-center block">
@@ -127,6 +165,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
+                
+
             </div>
         </div>
     </div>

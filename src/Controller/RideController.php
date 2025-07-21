@@ -220,4 +220,64 @@ class RideController extends AbstractController
 
         return new JsonResponse($rideDetails);
     }
+
+    #[Route('/ride/{id}/start', name: 'app_ride_start', methods: ['POST'])]
+    public function startRide(Ride $ride, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est le conducteur du trajet
+        if ($ride->getDriver() !== $user) {
+            return new JsonResponse(['success' => false, 'message' => 'Vous n\'êtes pas autorisé à démarrer ce trajet'], 403);
+        }
+        
+        // Vérifier que le trajet est en statut actif
+        if ($ride->getStatus() !== 'actif') {
+            return new JsonResponse(['success' => false, 'message' => 'Ce trajet ne peut pas être démarré'], 400);
+        }
+        
+        // Vérifier que le trajet est aujourd'hui
+        $today = new \DateTimeImmutable('today');
+        if ($ride->getDate()->format('Y-m-d') !== $today->format('Y-m-d')) {
+            return new JsonResponse(['success' => false, 'message' => 'Ce trajet ne peut être démarré que le jour prévu'], 400);
+        }
+        
+        // Démarrer le trajet
+        $ride->setStatus('en_cours');
+        $ride->setStartedAt(new \DateTime());
+        
+        $entityManager->flush();
+        
+        return new JsonResponse(['success' => true, 'message' => 'Trajet démarré avec succès']);
+    }
+
+    #[Route('/ride/{id}/complete', name: 'app_ride_complete', methods: ['POST'])]
+    public function completeRide(Ride $ride, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        
+        /** @var User $user */
+        $user = $this->getUser();
+        
+        // Vérifier que l'utilisateur est le conducteur du trajet
+        if ($ride->getDriver() !== $user) {
+            return new JsonResponse(['success' => false, 'message' => 'Vous n\'êtes pas autorisé à terminer ce trajet'], 403);
+        }
+        
+        // Vérifier que le trajet est en cours
+        if ($ride->getStatus() !== 'en_cours') {
+            return new JsonResponse(['success' => false, 'message' => 'Ce trajet ne peut pas être terminé'], 400);
+        }
+        
+        // Terminer le trajet
+        $ride->setStatus('termine');
+        $ride->setCompletedAt(new \DateTime());
+        
+        $entityManager->flush();
+        
+        return new JsonResponse(['success' => true, 'message' => 'Trajet terminé avec succès']);
+    }
 }
