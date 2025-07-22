@@ -4,7 +4,10 @@ services:
     env: static
     plan: free
     branch: main
-    buildCommand: "composer install --no-dev --optimize-autoloader"
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      php bin/console cache:clear --env=prod
+      php bin/console doctrine:migrations:migrate --env=prod --no-interaction
     startCommand: "php -S 0.0.0.0:10000 -t public"
     envVars:
       - key: APP_ENV
@@ -14,6 +17,13 @@ services:
       - key: APP_SECRET
         generateValue: true
       - key: DATABASE_URL
-        value: mysql://TONUSER:TONPASS@TONHOST:3306/TONNOMDEBASE
+        fromDatabase:
+          name: ecoride-db
+          property: connectionString
       - key: MONGODB_URL
-        value: mongodb+srv://TONUSER:TONPASS@toncluster.mongodb.net/TONDB
+        value: "mongodb+srv://username:password@cluster.mongodb.net/ecoride"
+
+databases:
+  - name: ecoride_db
+    databaseName: ecoride
+    user: ecoride_user
