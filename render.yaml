@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ecoride
+    env: docker
+    plan: free
+    branch: main
+    buildCommand: "composer install --no-dev --optimize-autoloader"
+    startCommand: "php -S 0.0.0.0:10000 -t public"
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: APP_SECRET
+        generateValue: true
