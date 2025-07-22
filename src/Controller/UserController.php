@@ -17,6 +17,7 @@ use App\Entity\Notification;
 use App\Form\RideType;
 use App\Repository\RideRepository;
 use App\Repository\ParticipationRepository;
+use App\Service\UserStatusService;
 
 class UserController extends AbstractController
 {
@@ -254,7 +255,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/mes-voyages', name: 'app_rides_user', methods: ['GET', 'POST'])]
-    public function userRides(Request $request, RideRepository $rideRepository, EntityManagerInterface $entityManager): Response
+    public function userRides(Request $request, RideRepository $rideRepository, EntityManagerInterface $entityManager, UserStatusService $userStatusService): Response
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         
@@ -276,6 +277,9 @@ class UserController extends AbstractController
             
             $entityManager->persist($ride);
             $entityManager->flush();
+
+            // Mettre à jour le statut utilisateur
+            $userStatusService->updateStatusOnRideCreated($user);
 
             return $this->redirectToRoute('app_rides_user');
         }
@@ -456,7 +460,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/participations/{id}/accepter', name: 'app_participation_accept', methods: ['POST'])]
-    public function acceptParticipation(Participation $participation, EntityManagerInterface $entityManager): JsonResponse
+    public function acceptParticipation(Participation $participation, EntityManagerInterface $entityManager, UserStatusService $userStatusService): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         
@@ -487,6 +491,9 @@ class UserController extends AbstractController
             
             $entityManager->flush();
             
+            // Mettre à jour le statut utilisateur
+            $userStatusService->updateStatusOnRideReserved($passenger);
+            
             return new JsonResponse([
                 'success' => true,
                 'message' => 'Demande acceptée ! Le passager a été ajouté à votre trajet.'
@@ -498,7 +505,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/participations/{id}/refuser', name: 'app_participation_refuse', methods: ['POST'])]
-    public function refuseParticipation(Participation $participation, EntityManagerInterface $entityManager): JsonResponse
+    public function refuseParticipation(Participation $participation, EntityManagerInterface $entityManager, UserStatusService $userStatusService): JsonResponse
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
         

@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Vehicle;
 use App\Form\VehicleType;
 use App\Repository\VehicleRepository;
+use App\Service\UserStatusService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +17,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class VehicleController extends AbstractController
 {
     #[Route('/mes-vehicules', name: 'app_vehicles', methods: ['GET', 'POST'])]
-    public function index(Request $request, VehicleRepository $vehicleRepository, EntityManagerInterface $entityManager): Response
+    public function index(Request $request, VehicleRepository $vehicleRepository, EntityManagerInterface $entityManager, UserStatusService $userStatusService): Response
     {
         $user = $this->getUser();
         
@@ -31,6 +32,9 @@ class VehicleController extends AbstractController
             $entityManager->persist($vehicle);
             $entityManager->flush();
 
+            // Mettre à jour le statut utilisateur
+            $userStatusService->updateStatusOnVehicleAdded($user);
+
             return $this->redirectToRoute('app_vehicles');
         }
 
@@ -44,14 +48,18 @@ class VehicleController extends AbstractController
     }
 
     #[Route('/mes-vehicules/{id}/supprimer', name: 'app_vehicles_delete')]
-    public function delete(Vehicle $vehicle, EntityManagerInterface $entityManager): Response
+    public function delete(Vehicle $vehicle, EntityManagerInterface $entityManager, UserStatusService $userStatusService): Response
     {
         if ($vehicle->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
 
+        $user = $this->getUser();
         $entityManager->remove($vehicle);
         $entityManager->flush();
+
+        // Mettre à jour le statut utilisateur
+        $userStatusService->updateStatusOnVehicleRemoved($user);
 
         return $this->redirectToRoute('app_vehicles');
     }

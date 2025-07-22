@@ -470,12 +470,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserRole(): string
     {
-        // Si un type d'utilisateur a été défini lors de l'inscription, l'utiliser
+        // Si un type d'utilisateur a été défini, l'utiliser
         if ($this->userType !== null) {
             return $this->userType;
         }
         
-        // Sinon, utiliser l'ancienne logique pour compatibilité avec les utilisateurs existants
+        // Sinon, calculer le statut basé sur les actions actuelles
         $hasVehicles = !$this->vehicles->isEmpty();
         $hasDrivenRides = !$this->drivenRides->isEmpty();
         $hasRidesAsPassenger = !$this->ridesAsPassenger->isEmpty();

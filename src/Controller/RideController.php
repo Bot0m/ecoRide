@@ -6,6 +6,7 @@ use App\Entity\Participation;
 use App\Entity\Ride;
 use App\Entity\User;
 use App\Repository\RideRepository;
+use App\Service\UserStatusService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -67,7 +68,7 @@ class RideController extends AbstractController
     }
 
     #[Route('/trajets/{id}/reserver', name: 'app_ride_reserve', methods: ['POST'])]
-    public function reserveRide(Ride $ride, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function reserveRide(Ride $ride, Request $request, EntityManagerInterface $entityManager, UserStatusService $userStatusService): JsonResponse
     {
         // Vérifier que l'utilisateur est connecté
         /** @var User $user */
@@ -142,6 +143,9 @@ class RideController extends AbstractController
             // Persister les changements
             $entityManager->persist($participation);
             $entityManager->flush();
+
+            // Mettre à jour le statut utilisateur
+            $userStatusService->updateStatusOnRideReserved($user);
 
             $seatsText = $seatsRequested > 1 ? "{$seatsRequested} places" : "1 place";
             return new JsonResponse([

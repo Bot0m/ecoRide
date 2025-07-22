@@ -106,15 +106,15 @@ class VehicleType extends AbstractType
                     new Assert\Range(['min' => 2, 'max' => 8, 'notInRangeMessage' => 'Le nombre de places doit être entre {{ min }} et {{ max }}'])
                 ]
             ])
-            ->add('registrationDate', DateType::class, [
+            ->add('registrationDate', TextType::class, [
                 'label' => 'Date de première immatriculation',
-                'widget' => 'single_text',
                 'attr' => [
-                    'class' => 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-300'
+                    'class' => 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-accent transition-all duration-300',
+                    'readonly' => true,
+                    'placeholder' => 'Sélectionner une date'
                 ],
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'La date d\'immatriculation est obligatoire']),
-                    new Assert\LessThanOrEqual(['value' => 'today', 'message' => 'La date d\'immatriculation ne peut pas être dans le futur'])
+                    new Assert\NotBlank(['message' => 'La date d\'immatriculation est obligatoire'])
                 ]
             ])
             ->add('submit', SubmitType::class, [

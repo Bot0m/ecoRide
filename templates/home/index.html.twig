@@ -27,59 +27,92 @@
 
         <div class="w-full max-w-6xl backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 mb-6">
             <form method="get" action="{{ path('app_rides') }}" class="flex flex-wrap justify-center gap-2 md:gap-4">
-                <div class="relative">
+                <div class="relative max-w-sm">
+                    <label for="home-departure" class="block text-sm font-base text-textPrimary mb-2 text-left">Ville de départ</label>
                     <input
                         type="text"
                         name="departure"
                         id="home-departure"
-                        placeholder="Ville de départ"
+                        placeholder="Nantes"
                         autocomplete="off"
-                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                        class="w-full px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
                     />
                     <div id="home-departure-suggestions" class="absolute top-full left-0 right-0 bg-backgroundDark border border-accentDark rounded-lg mt-1 max-h-60 overflow-y-auto z-50 hidden shadow-xl"></div>
                 </div>
-                <div class="relative">
+                <div class="relative max-w-sm">
+                    <label for="home-arrival" class="block text-sm font-base text-textPrimary mb-2 text-left">Ville d'arrivée</label>
                     <input
                         type="text"
                         name="arrival"
                         id="home-arrival"
-                        placeholder="Ville d'arrivée"
+                        placeholder="Paris"
                         autocomplete="off"
-                        class="px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                        class="w-full px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
                     />
                     <div id="home-arrival-suggestions" class="absolute top-full left-0 right-0 bg-backgroundDark border border-accentDark rounded-lg mt-1 max-h-60 overflow-y-auto z-50 hidden shadow-xl"></div>
                 </div>
                 
                 <div class="relative max-w-sm">
-                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-tSecondaryLight" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                        </svg>
+                    <label for="home-date" class="block text-sm font-base text-textPrimary mb-2 text-left">Date de départ</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-tSecondaryLight" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                            </svg>
+                        </div>
+                        <input name="date" type="text" 
+                            id="home-date"
+                            value="{{ 'now'|date('d/m/Y') }}"
+                            readonly
+                            class="w-full px-4 py-2 ps-10 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark cursor-pointer" 
+                            placeholder="Sélectionner une date">
                     </div>
-                    <input name="date" type="date" 
-                        value="{{ 'now'|date('Y-m-d') }}"
-                        class="font-body text-secondary bg-backgroundDark border border-accentDark text-textPrimary placeholder-tSecondaryLight text-body rounded-lg block w-full ps-10 p-2.5 focus:border-accentDark" 
-                        placeholder="Date de départ">
                 </div>
 
-                <div class="relative flex items-center max-w-[8rem]">
-                    <button type="button" id="home-decrement-button" data-input-counter-decrement="home-quantity-input" class="group bg-background hover:bg-backgroundDark border border-accentDark rounded-s-lg p-3 h-11">
-                        <svg class="w-3 h-3 text-tSecondaryLight group-hover:text-textPrimary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h16"/>
-                        </svg>
-                    </button>
-                    <input type="text" id="home-quantity-input" name="passengers" data-input-counter aria-describedby="helper-text-explanation" class="font-body text-secondary bg-backgroundDark border-x-0 border-accentDark h-11 text-center text-textPrimary text-body block w-full py-2.5 focus:border-accentDark" value="1" min="1" max="4" required />
-                    <button type="button" id="home-increment-button" data-input-counter-increment="home-quantity-input" class="group bg-background hover:bg-backgroundDark border border-accentDark rounded-e-lg p-3 h-11">
-                        <svg class="w-3 h-3 text-tSecondaryLight group-hover:text-textPrimary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
-                        </svg>
-                    </button>
+                <div class="relative max-w-sm">
+                    <label for="home-quantity-input" class="block text-sm font-base text-textPrimary mb-2 text-left">Nombre de passagers</label>
+                    <input
+                        type="number"
+                        name="passengers"
+                        id="home-quantity-input"
+                        placeholder="Ex: 2"
+                        value="1"
+                        min="1"
+                        max="7"
+                        class="w-full px-4 py-2 font-body text-secondary rounded-lg bg-backgroundDark text-textPrimary placeholder-tSecondaryLight border-accentDark focus:border-accentDark"
+                    />
                 </div>
 
                 <button type="submit" class="font-body text-base text-textSecondary hover:text-textPrimary bg-accent hover:bg-accentDark rounded-lg text-body px-4 py-2 transition-all duration-300">
                     Rechercher
                 </button>
             </form>
+        </div>
+        <!-- Calendrier personnalisé sorti du conteneur glassmorphique -->
+        <div id="home-date-picker" class="absolute bg-backgroundDark border border-accentDark rounded-lg mt-1 p-4 z-[100] hidden shadow-xl" style="max-height: 400px; overflow-y: auto;">
+            <div class="flex items-center justify-between mb-4">
+                <button type="button" id="home-prev-month" class="text-tSecondaryLight hover:text-textPrimary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h3 id="home-current-month" class="text-textPrimary font-base"></h3>
+                <button type="button" id="home-next-month" class="text-tSecondaryLight hover:text-textPrimary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 mb-2" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem;">
+                <div class="text-center text-xs text-tSecondaryLight">Lun</div>
+                <div class="text-center text-xs text-tSecondaryLight">Mar</div>
+                <div class="text-center text-xs text-tSecondaryLight">Mer</div>
+                <div class="text-center text-xs text-tSecondaryLight">Jeu</div>
+                <div class="text-center text-xs text-tSecondaryLight">Ven</div>
+                <div class="text-center text-xs text-tSecondaryLight">Sam</div>
+                <div class="text-center text-xs text-tSecondaryLight">Dim</div>
+            </div>
+            <div id="home-calendar-days" class="gap-1" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem;"></div>
         </div>
         <br>
         <h1 class="text-title font-title text-secondary">
@@ -231,28 +264,7 @@
 {{ importmap('city-autocomplete') }}
 
 <script>
-// Script pour les boutons de compteur sur la page d'accueil
 document.addEventListener('DOMContentLoaded', function() {
-    const decrementButton = document.getElementById('home-decrement-button');
-    const incrementButton = document.getElementById('home-increment-button');
-    const quantityInput = document.getElementById('home-quantity-input');
-    
-    if (decrementButton && incrementButton && quantityInput) {
-        decrementButton.addEventListener('click', function() {
-            const currentValue = parseInt(quantityInput.value);
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        });
-        
-        incrementButton.addEventListener('click', function() {
-            const currentValue = parseInt(quantityInput.value);
-            if (currentValue < 4) {
-                quantityInput.value = currentValue + 1;
-            }
-        });
-    }
-    
     // Initialiser l'autocomplétion des villes
     if (typeof CityAutocomplete !== 'undefined') {
         new CityAutocomplete('home-departure', 'home-departure-suggestions');
@@ -422,6 +434,169 @@ function initReviewsCarousel() {
     // Démarrer la rotation automatique
     startAutoRotation();
 }
+
+// Calendrier personnalisé pour la page d'accueil
+class HomeDatePicker {
+    constructor(inputId, pickerId, daysId, monthId, prevBtnId, nextBtnId) {
+        this.input = document.getElementById(inputId);
+        this.picker = document.getElementById(pickerId);
+        this.daysContainer = document.getElementById(daysId);
+        this.monthDisplay = document.getElementById(monthId);
+        this.prevBtn = document.getElementById(prevBtnId);
+        this.nextBtn = document.getElementById(nextBtnId);
+        
+        this.currentDate = new Date();
+        this.selectedDate = new Date();
+        
+        this.init();
+    }
+    
+    init() {
+        this.renderCalendar();
+        this.bindEvents();
+    }
+    
+    renderCalendar() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        
+        // Afficher le mois et l'année
+        const monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+        this.monthDisplay.textContent = `${monthNames[month]} ${year}`;
+        
+        // Obtenir le premier jour du mois et le nombre de jours
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay() + (firstDay.getDay() === 0 ? -6 : 1));
+        
+        this.daysContainer.innerHTML = '';
+        
+        // Générer les jours
+        for (let i = 0; i < 42; i++) {
+            const date = new Date(startDate);
+            date.setDate(startDate.getDate() + i);
+            
+            const dayElement = document.createElement('div');
+            dayElement.className = 'text-center p-2 cursor-pointer hover:bg-accent/20 rounded';
+            
+            // Vérifier si c'est le mois actuel
+            if (date.getMonth() === month) {
+                dayElement.classList.add('text-textPrimary');
+                
+                const today = new Date();
+                const isToday = date.toDateString() === today.toDateString();
+                const isSelected = date.toDateString() === this.selectedDate.toDateString();
+                
+                // Logique de coloration prioritaire
+                if (isSelected) {
+                    // Date sélectionnée (priorité la plus haute)
+                    dayElement.classList.add('bg-accent', 'text-textSecondary');
+                } else if (isToday) {
+                    // Aujourd'hui mais non sélectionné
+                    dayElement.style.backgroundColor = '#FFE0B2';
+                    dayElement.style.color = '#3E2723';
+                }
+                
+                // Vérifier si la date est dans le passé
+                if (date < new Date().setHours(0, 0, 0, 0)) {
+                    dayElement.classList.add('text-tSecondaryLight', 'cursor-not-allowed');
+                } else {
+                    dayElement.addEventListener('click', () => this.selectDate(date));
+                }
+            } else {
+                dayElement.classList.add('text-tSecondaryLight');
+            }
+            
+            dayElement.textContent = date.getDate();
+            this.daysContainer.appendChild(dayElement);
+        }
+    }
+    
+    selectDate(date) {
+        this.selectedDate = date;
+        this.input.value = date.toLocaleDateString('fr-FR');
+        
+        // Créer un champ caché avec la date au format Y-m-d pour le formulaire
+        let hiddenInput = document.querySelector(`input[name="date"][type="hidden"]`);
+        if (!hiddenInput) {
+            hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'date';
+            this.input.parentNode.appendChild(hiddenInput);
+        }
+        hiddenInput.value = date.toISOString().split('T')[0];
+        
+        this.hidePicker();
+        this.renderCalendar();
+    }
+    
+    bindEvents() {
+        this.input.addEventListener('click', () => this.togglePicker());
+        
+        this.prevBtn.addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+            this.renderCalendar();
+        });
+        
+        this.nextBtn.addEventListener('click', () => {
+            this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+            this.renderCalendar();
+        });
+        
+        // Fermer le calendrier en cliquant à l'extérieur
+        document.addEventListener('click', (e) => {
+            if (!this.picker.contains(e.target) && !this.input.contains(e.target)) {
+                this.hidePicker();
+            }
+        });
+    }
+    
+    togglePicker() {
+        if (this.picker.classList.contains('hidden')) {
+            this.showPicker();
+        } else {
+            this.hidePicker();
+        }
+    }
+    
+    showPicker() {
+        this.picker.classList.remove('hidden');
+        
+        // Positionner le calendrier par rapport au champ de date
+        const inputRect = this.input.getBoundingClientRect();
+        this.picker.style.position = 'fixed';
+        this.picker.style.top = (inputRect.bottom + 4) + 'px';
+        this.picker.style.left = inputRect.left + 'px';
+        this.picker.style.width = inputRect.width + 'px';
+        
+        // Vérifier si le calendrier déborde en bas
+        setTimeout(() => {
+            const pickerRect = this.picker.getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            
+            if (pickerRect.bottom > viewportHeight) {
+                // Le calendrier déborde, le positionner au-dessus du champ
+                this.picker.style.top = (inputRect.top - this.picker.offsetHeight - 4) + 'px';
+            }
+        }, 10);
+    }
+    
+    hidePicker() {
+        this.picker.classList.add('hidden');
+        
+        // Réinitialiser la position
+        this.picker.style.position = '';
+        this.picker.style.top = '';
+        this.picker.style.left = '';
+        this.picker.style.width = '';
+    }
+}
+
+// Initialiser le calendrier de la page d'accueil
+document.addEventListener('DOMContentLoaded', function() {
+    new HomeDatePicker('home-date', 'home-date-picker', 'home-calendar-days', 'home-current-month', 'home-prev-month', 'home-next-month');
+});
 </script>
 
 {% endblock %}

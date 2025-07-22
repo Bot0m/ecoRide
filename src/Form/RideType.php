@@ -5,7 +5,7 @@ namespace App\Form;
 use App\Entity\Ride;
 use App\Entity\Vehicle;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
+
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -48,15 +48,15 @@ class RideType extends AbstractType
                     new Assert\Length(['max' => 255, 'maxMessage' => 'La ville d\'arrivée ne peut pas dépasser {{ limit }} caractères'])
                 ]
             ])
-            ->add('date', DateType::class, [
+            ->add('date', TextType::class, [
                 'label' => 'Date du voyage',
-                'widget' => 'single_text',
                 'attr' => [
-                    'class' => 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark focus:outline-none focus:border-accent backdrop-blur-sm'
+                    'class' => 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark focus:outline-none focus:border-accent backdrop-blur-sm',
+                    'readonly' => true,
+                    'placeholder' => 'Sélectionner une date'
                 ],
                 'constraints' => [
-                    new Assert\NotBlank(['message' => 'La date du voyage est obligatoire']),
-                    new Assert\GreaterThanOrEqual(['value' => 'today', 'message' => 'La date du voyage ne peut pas être dans le passé'])
+                    new Assert\NotBlank(['message' => 'La date du voyage est obligatoire'])
                 ]
             ])
             ->add('departureTime', TimeType::class, [
