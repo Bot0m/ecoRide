@@ -122,12 +122,13 @@
                                     <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                 </svg>
                             </div>
-                            <input name="vehicle[registrationDate]" type="text" 
-                                id="vehicle_registration_date"
-                                value="{{ form.registrationDate.vars.value ? form.registrationDate.vars.value|date('d/m/Y') : '' }}"
-                                readonly
-                                class="w-full px-4 py-2 ps-10 font-body text-secondary rounded-lg bg-white/20 text-backgroundDark placeholder-backgroundDark/60 border-white/30 focus:border-accent cursor-pointer backdrop-blur-sm" 
-                                placeholder="Sélectionner une date">
+                            {{ form_widget(form.registrationDate, {
+                                'attr': {
+                                    'class': 'w-full px-4 py-2 ps-10 font-body text-secondary rounded-lg bg-white/20 text-backgroundDark placeholder-backgroundDark/60 border-white/30 focus:border-accent cursor-pointer backdrop-blur-sm',
+                                    'readonly': true,
+                                    'placeholder': 'Sélectionner une date'
+                                }
+                            }) }}
                         </div>
                         {{ form_errors(form.registrationDate) }}
                     </div>
@@ -172,8 +173,7 @@
                 </div>
                 {% endif %}
                 
-                <!-- Champ caché pour la date d'immatriculation -->
-                {{ form_widget(form.registrationDate, {'attr': {'style': 'display: none;'}}) }}
+
             {{ form_end(form) }}
         </div>
     </div>
@@ -319,17 +319,11 @@
             
             selectDate(date) {
                 this.selectedDate = date;
-                this.input.value = date.toLocaleDateString('fr-FR');
-                
-                // Créer un champ caché avec la date au format Y-m-d pour le formulaire
-                let hiddenInput = document.querySelector(`input[name="vehicle[registrationDate]"][type="hidden"]`);
-                if (!hiddenInput) {
-                    hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'vehicle[registrationDate]';
-                    this.input.parentNode.appendChild(hiddenInput);
-                }
-                hiddenInput.value = date.toISOString().split('T')[0];
+                // Utiliser le format local pour éviter les problèmes de fuseau horaire
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                this.input.value = `${year}-${month}-${day}`;
                 
                 this.hidePicker();
                 this.renderCalendar();
@@ -399,7 +393,7 @@
 
         // Initialiser le calendrier du formulaire de véhicule
         document.addEventListener('DOMContentLoaded', function() {
-            new VehicleDatePicker('vehicle_registration_date', 'vehicle-date-picker', 'vehicle-calendar-days', 'vehicle-current-month', 'vehicle-prev-month', 'vehicle-next-month');
+            new VehicleDatePicker('{{ form.registrationDate.vars.id }}', 'vehicle-date-picker', 'vehicle-calendar-days', 'vehicle-current-month', 'vehicle-prev-month', 'vehicle-next-month');
             
             // Auto-formatage de la plaque d'immatriculation
             const plateInput = document.querySelector('input[name="vehicle[plate]"]');

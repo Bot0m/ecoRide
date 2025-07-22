@@ -12,6 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Form\DataTransformer\DateTransformer;
 
 class VehicleType extends AbstractType
 {
@@ -123,6 +124,9 @@ class VehicleType extends AbstractType
                     'class' => 'w-full bg-accent hover:bg-accentDark text-textPrimary font-base py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl'
                 ]
             ]);
+        
+        // Ajouter le transformer pour le champ registrationDate
+        $builder->get('registrationDate')->addModelTransformer(new DateTransformer());
     }
 
     public function configureOptions(OptionsResolver $resolver): void

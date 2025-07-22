@@ -14,7 +14,7 @@
     <div>
         <h2 class="text-subtitle font-title text-textPrimary mb-6">Avis à traiter</h2>
         <div class="space-y-4">
-            {% set reviewsToProcess = reviews|filter(r => r.isValidated is null) %}
+            {% set reviewsToProcess = reviews|filter(r => r.isValidated == false) %}
             {% if reviewsToProcess is empty %}
                 <div class="text-center py-12">
                     <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +119,7 @@
     <div>
         <h2 class="text-subtitle font-title text-textPrimary mb-6">Historique des avis</h2>
         <div class="space-y-4">
-            {% set reviewsHistory = reviews|filter(r => r.isValidated is not null) %}
+            {% set reviewsHistory = reviews|filter(r => r.isValidated == true) %}
             {% if reviewsHistory is empty %}
                 <div class="text-center py-12">
                     <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

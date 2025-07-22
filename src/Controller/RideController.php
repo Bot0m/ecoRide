@@ -176,9 +176,11 @@ class RideController extends AbstractController
         $vehicle = $ride->getVehicle();
         
         // Récupérer les participants acceptés ET annulés (pour l'historique)
+        // Exclure le conducteur de la liste des participants
         $participants = [];
         foreach ($ride->getParticipations() as $participation) {
-            if ($participation->getStatus() === 'acceptee' || $participation->getStatus() === 'annulee') {
+            if (($participation->getStatus() === 'acceptee' || $participation->getStatus() === 'annulee') 
+                && $participation->getUser() !== $ride->getDriver()) {
                 $participants[] = [
                     'id' => $participation->getUser()->getId(),
                     'pseudo' => $participation->getUser()->getPseudo(),

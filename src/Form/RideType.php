@@ -9,11 +9,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Form\DataTransformer\DateTransformer;
 
 class RideType extends AbstractType
 {
@@ -51,6 +53,7 @@ class RideType extends AbstractType
             ->add('date', TextType::class, [
                 'label' => 'Date du voyage',
                 'attr' => [
+                    'id' => 'ride_date',
                     'class' => 'w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-backgroundDark focus:outline-none focus:border-accent backdrop-blur-sm',
                     'readonly' => true,
                     'placeholder' => 'Sélectionner une date'
@@ -127,6 +130,9 @@ class RideType extends AbstractType
                     'class' => 'w-full bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl'
                 ]
             ]);
+        
+        // Ajouter le transformer pour le champ date
+        $builder->get('date')->addModelTransformer(new DateTransformer());
     }
 
     public function configureOptions(OptionsResolver $resolver): void

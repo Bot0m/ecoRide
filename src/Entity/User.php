@@ -56,7 +56,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
-    #[ORM\Column(type: 'decimal', precision: 3, scale: 1, options: ['default' => 5.0])]
+    #[ORM\Column(type: 'float', options: ['default' => 5.0], nullable: false)]
     private float $averageRating = 5.0;
 
     /**

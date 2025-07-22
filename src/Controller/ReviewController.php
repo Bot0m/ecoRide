@@ -226,22 +226,14 @@ class ReviewController extends AbstractController
 
     private function getUserParticipation(User $user, Ride $ride, EntityManagerInterface $entityManager): ?Participation
     {
-        // Chercher d'abord une participation existante
+        // Chercher une participation existante
         $participation = $entityManager->getRepository(Participation::class)
             ->findOneBy(['user' => $user, 'ride' => $ride]);
         
-        // Si c'est le conducteur et qu'il n'a pas de participation, on en crée une
-        if (!$participation && $ride->getDriver() === $user) {
-            $participation = new Participation();
-            $participation->setUser($user);
-            $participation->setRide($ride);
-            $participation->setStatus('acceptee'); // Le conducteur est automatiquement accepté
-            $participation->setSeatsCount(1);
-            $participation->setHasGivenReview(false);
-            $participation->setTripValidated(true);
-            
-            $entityManager->persist($participation);
-            $entityManager->flush();
+        // Si c'est le conducteur, on retourne null car il n'a pas de participation
+        // Le conducteur peut quand même laisser des avis grâce à la logique dans canUserReviewRide
+        if ($ride->getDriver() === $user) {
+            return null;
         }
         
         return $participation;
