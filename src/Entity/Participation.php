@@ -5,6 +5,15 @@ namespace App\Entity;
 use App\Repository\ParticipationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité Participation représentant une participation à un trajet
+ * 
+ * Cette entité gère les participations des utilisateurs aux trajets :
+ * - Statut de la participation (en attente, acceptée, refusée, annulée)
+ * - Nombre de places réservées
+ * - Validation du trajet et évaluations
+ * - Lien avec l'avis associé
+ */
 #[ORM\Entity(repositoryClass: ParticipationRepository::class)]
 class Participation
 {

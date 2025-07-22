@@ -13,6 +13,16 @@ use App\Entity\Ride;
 use App\Entity\Review;
 use App\Form\EmployeType;
 
+/**
+ * Contrôleur pour la gestion administrative
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités d'administration :
+ * - Tableau de bord avec statistiques
+ * - Gestion des employés
+ * - Gestion des utilisateurs
+ * - Validation des avis
+ * - Statistiques de la plateforme
+ */
 #[Route('/admin')]
 class AdminController extends AbstractController
 {

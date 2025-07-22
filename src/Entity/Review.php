@@ -6,6 +6,15 @@ use App\Repository\ReviewRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité Review représentant un avis entre utilisateurs
+ * 
+ * Cette entité gère les évaluations entre utilisateurs de la plateforme :
+ * - Note et commentaire
+ * - Auteur et utilisateur évalué
+ * - Statut de validation
+ * - Lien avec la participation au trajet
+ */
 #[ORM\Entity(repositoryClass: ReviewRepository::class)]
 class Review
 {

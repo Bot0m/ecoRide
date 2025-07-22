@@ -10,6 +10,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité User représentant un utilisateur de l'application
+ * 
+ * Cette entité gère les utilisateurs de la plateforme de covoiturage,
+ * incluant les informations de base, les préférences, les véhicules,
+ * les trajets et les évaluations.
+ */
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface

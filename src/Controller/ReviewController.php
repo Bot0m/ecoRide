@@ -18,6 +18,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+/**
+ * Contrôleur pour la gestion des avis et évaluations
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités liées aux avis :
+ * - Soumission d'avis entre utilisateurs
+ * - Validation et rejet d'avis par les employés
+ * - Gestion des utilisateurs à évaluer
+ */
 class ReviewController extends AbstractController
 {
     #[Route('/ride/{id}/users-to-review', name: 'app_ride_users_to_review', methods: ['GET'])]

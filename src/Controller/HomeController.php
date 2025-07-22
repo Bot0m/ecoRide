@@ -9,7 +9,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class HomeCrontrollerController extends AbstractController
+/**
+ * Contrôleur principal pour la page d'accueil
+ */
+final class HomeController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
     public function index(RideRepository $rideRepository, ReviewRepository $reviewRepository): Response
@@ -52,4 +55,4 @@ final class HomeCrontrollerController extends AbstractController
             'topReviews' => $topReviews,
         ]);
     }
-}
+} 

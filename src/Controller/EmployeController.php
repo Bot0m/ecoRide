@@ -12,6 +12,14 @@ use App\Entity\Review;
 use App\Repository\RideRepository;
 use App\Repository\ReviewRepository;
 
+/**
+ * Contrôleur pour la gestion des employés
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités réservées aux employés :
+ * - Tableau de bord employé
+ * - Consultation de tous les voyages
+ * - Gestion des avis (validation/rejet)
+ */
 final class EmployeController extends AbstractController
 {
     #[Route('/employe', name: 'employe_dashboard')]

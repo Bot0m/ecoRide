@@ -14,6 +14,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur pour la gestion des trajets de covoiturage
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités liées aux trajets :
+ * - Recherche et affichage des trajets
+ * - Réservation de places
+ * - Détails des trajets
+ * - Démarrage et finalisation des trajets
+ */
 class RideController extends AbstractController
 {
     #[Route('/covoiturages', name: 'app_rides')]

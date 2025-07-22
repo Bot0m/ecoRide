@@ -4,6 +4,13 @@ namespace App\Service;
 
 use MongoDB\Client;
 use MongoDB\BSON\UTCDateTime;
+
+/**
+ * Service de gestion des messages de contact
+ * 
+ * Ce service gère le stockage des messages de contact
+ * dans une base de données MongoDB pour la persistance
+ */
 class ContactMessageService
 {
     private $collection;

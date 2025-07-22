@@ -5,6 +5,15 @@ namespace App\Entity;
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité Notification représentant une notification utilisateur
+ * 
+ * Cette entité gère les notifications envoyées aux utilisateurs :
+ * - Message et type de notification
+ * - Statut de lecture
+ * - Utilisateur destinataire
+ * - Lien optionnel avec un trajet
+ */
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 class Notification
 {

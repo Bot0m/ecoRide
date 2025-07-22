@@ -5,6 +5,12 @@ namespace App\Service;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Service de gestion du statut utilisateur
+ * 
+ * Ce service gère la mise à jour automatique du type d'utilisateur
+ * basé sur ses activités (conducteur, passager, nouveau membre)
+ */
 class UserStatusService
 {
     public function __construct(

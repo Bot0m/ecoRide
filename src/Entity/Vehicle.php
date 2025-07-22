@@ -5,6 +5,15 @@ namespace App\Entity;
 use App\Repository\VehicleRepository;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité Vehicle représentant un véhicule
+ * 
+ * Cette entité gère les véhicules des utilisateurs avec leurs caractéristiques :
+ * - Informations d'immatriculation
+ * - Marque, modèle et couleur
+ * - Type d'énergie et nombre de places
+ * - Propriétaire du véhicule
+ */
 #[ORM\Entity(repositoryClass: VehicleRepository::class)]
 class Vehicle
 {

@@ -6,6 +6,12 @@ use App\Entity\Review;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Service de gestion des avis et évaluations
+ * 
+ * Ce service gère la création, validation, rejet et calcul des notes moyennes
+ * pour les avis entre utilisateurs de la plateforme.
+ */
 class ReviewService
 {
     public function __construct(

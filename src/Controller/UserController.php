@@ -19,6 +19,16 @@ use App\Repository\RideRepository;
 use App\Repository\ParticipationRepository;
 use App\Service\UserStatusService;
 
+/**
+ * Contrôleur pour la gestion des utilisateurs
+ * 
+ * Ce contrôleur gère toutes les fonctionnalités liées aux utilisateurs :
+ * - Profil et préférences
+ * - Gestion des crédits
+ * - Mes voyages et participations
+ * - Notifications
+ * - Évaluations
+ */
 class UserController extends AbstractController
 {
     #[Route('/credit', name: 'credit')]

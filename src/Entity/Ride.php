@@ -8,6 +8,16 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+/**
+ * Entité Ride représentant un trajet de covoiturage
+ * 
+ * Cette entité gère les trajets de covoiturage avec toutes leurs informations :
+ * - Lieux de départ et d'arrivée
+ * - Date et heures de départ/arrivée
+ * - Prix et places disponibles
+ * - Conducteur et passagers
+ * - Statut du trajet
+ */
 #[ORM\Entity(repositoryClass: RideRepository::class)]
 class Ride
 {
