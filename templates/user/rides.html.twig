@@ -193,7 +193,7 @@
 
     <!-- Section de l'historique -->
     <div>
-        <h2 class="text-subtitle font-title text-textPrimary mb-6">Mon historique de voyages</h2>
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Mon historique de voyages ({{ totalPastRides }})</h2>
         
         {% if pastRides is empty %}
             <div class="bg-gradient-to-br from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
@@ -276,6 +276,49 @@
                     </div>
                 {% endfor %}
             </div>
+            
+            <!-- Pagination -->
+            {% if totalPages > 1 %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center gap-2">
+                        {% if currentPage > 1 %}
+                            <a href="{{ path('app_rides_user', {'page': currentPage - 1}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Précédent
+                            </a>
+                        {% endif %}
+                        
+                        <div class="flex items-center gap-1">
+                            {% for page in 1..totalPages %}
+                                {% if page == currentPage %}
+                                    <span class="inline-flex items-center px-3 py-2 text-sm font-base text-textPrimary bg-accent/20 border border-accent/30 rounded-lg">
+                                        {{ page }}
+                                    </span>
+                                {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                                    <a href="{{ path('app_rides_user', {'page': page}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                        {{ page }}
+                                    </a>
+                                {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                                    <span class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary">
+                                        ...
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if currentPage < totalPages %}
+                            <a href="{{ path('app_rides_user', {'page': currentPage + 1}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                Suivant
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 {% endblock %}

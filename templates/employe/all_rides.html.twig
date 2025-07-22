@@ -189,6 +189,49 @@
                     </div>
                 {% endfor %}
             </div>
+            
+            <!-- Pagination pour l'historique -->
+            {% if totalPastPages > 1 %}
+                <div class="mt-8 flex justify-center">
+                    <nav class="flex items-center gap-2">
+                        {% if currentPage > 1 %}
+                            <a href="{{ path('employe_all_rides', {'page': currentPage - 1}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                                Précédent
+                            </a>
+                        {% endif %}
+                        
+                        <div class="flex items-center gap-1">
+                            {% for page in 1..totalPastPages %}
+                                {% if page == currentPage %}
+                                    <span class="inline-flex items-center px-3 py-2 text-sm font-base text-textPrimary bg-accent/20 border border-accent/30 rounded-lg">
+                                        {{ page }}
+                                    </span>
+                                {% elseif page == 1 or page == totalPastPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                                    <a href="{{ path('employe_all_rides', {'page': page}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                        {{ page }}
+                                    </a>
+                                {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                                    <span class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary">
+                                        ...
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        
+                        {% if currentPage < totalPastPages %}
+                            <a href="{{ path('employe_all_rides', {'page': currentPage + 1}) }}" class="inline-flex items-center px-3 py-2 text-sm font-base text-textSecondary bg-background/20 border border-background/30 rounded-lg hover:bg-background/40 transition-colors duration-300">
+                                Suivant
+                                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 

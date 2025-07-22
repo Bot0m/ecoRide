@@ -116,78 +116,77 @@
     </div>
 </section>
 
-{# 
-<!-- Section Témoignages -->
-<section class="testimonials-section bg-secondary pb-16">
-    <h3 class="text-subtitle font-title pt-8 text-center text-textPrimary">
-        Ce que disent nos utilisateurs
-    </h3>
-    <div id="animation-carousel" class="relative w-full" data-carousel="slide" data-carousel-interval="3000">
-        <!-- Carousel wrapper -->
-        <div class="max-w-screen-xl mx-auto text-center">
-            <!-- Item 1 -->
-            <div class="block" data-carousel-item>
-                <div class="bg-secondary">
-                    <div class="max-w-screen-xl px-4 py-8 mx-auto text-center lg:py-16 lg:px-6">
-                        <figure class="max-w-screen-md mx-auto">
-                            <blockquote>
-                                <p class="text-2xl font-body text-subtitle text-textPrimary">"Une expérience conviviale, économique et respectueuse de l'environnement."</p>
-                            </blockquote>
-                            <figcaption class="flex items-center justify-center mt-6 space-x-3">
-                                <img class="w-6 h-6 rounded-full" src="{{ asset('images/Thomas-Lean.png') }}" alt="photo de profil">
-                                <div class="flex flex-col space-x-2 rtl:space-x-reverse rtl:space-x-2">
-                                    <div class="pr-3 font-body text-base text-textPrimary">Thomas Lean</div>
-                                    <div class="pl-3 font-body text-secondary text-tSecondaryLight">Voyageur</div>
+<!-- Section Avis des utilisateurs -->
+{% if topReviews|length > 0 %}
+<section class="bg-backgroundDark py-24">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-title text-textPrimary mb-6">Ce que disent nos utilisateurs</h2>
+            <p class="text-textSecondary font-body text-lg">Découvrez les avis de nos utilisateurs satisfaits</p>
+        </div>
+        
+        <div class="relative">
+            <!-- Container pour les avis rotatifs -->
+            <div id="reviewsCarousel" class="flex transition-transform duration-1000 ease-out">
+                {% for review in topReviews %}
+                    <div class="review-slide w-full flex-shrink-0 px-4">
+                        <div class="max-w-2xl mx-auto">
+                            <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-8 border border-accent/30 shadow-xl">
+                                <!-- Note avec étoiles -->
+                                <div class="flex justify-center mb-8">
+                                    <div class="flex items-center">
+                                        {% for i in 1..5 %}
+                                            <svg class="w-8 h-8 {% if i <= review.rating %}text-accentDark{% else %}text-textSecondary/30{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                            </svg>
+                                        {% endfor %}
+                                        <span class="ml-3 text-textPrimary font-base text-lg">{{ review.rating }}/5</span>
+                                    </div>
                                 </div>
-                            </figcaption>
-                        </figure>
+                                
+                                <!-- Commentaire -->
+                                {% if review.comment %}
+                                    <blockquote class="text-center mb-10">
+                                        <p class="text-xl font-body text-textPrimary italic leading-relaxed">"{{ review.comment }}"</p>
+                                    </blockquote>
+                                {% else %}
+                                    <div class="text-center mb-10">
+                                        <p class="text-xl font-body text-textPrimary italic leading-relaxed">"Excellent trajet, je recommande !"</p>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Espacement entre commentaire et infos -->
+                                <div class="h-6"></div>
+                                
+                                <!-- Informations de l'auteur et du trajet -->
+                                <div class="text-center">
+                                    <div class="mb-4">
+                                        <p class="text-textPrimary font-base text-lg font-semibold mb-2">{{ review.author.pseudo }}</p>
+                                        {% if review.participation and review.participation.ride %}
+                                            <p class="text-textSecondary text-sm">{{ review.participation.ride.departure }} → {{ review.participation.ride.arrival }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                {% endfor %}
             </div>
             
-            <!-- Item 2 -->
-            <div class="hidden" data-carousel-item>
-                <div class="bg-secondary">
-                    <div class="max-w-screen-xl px-4 py-8 mx-auto text-center lg:py-16 lg:px-6">
-                        <figure class="max-w-screen-md mx-auto">
-                            <blockquote>
-                                <p class="text-2xl font-body text-subtitle text-textPrimary">"Grâce à la plateforme, je partage mes trajets facilement tout en rentabilisant mes déplacements."</p>
-                            </blockquote>
-                            <figcaption class="flex items-center justify-center mt-6 space-x-3">
-                                <img class="w-6 h-6 rounded-full" src="{{ asset('images/Helene-Engels.png') }}" alt="photo de profil">
-                                <div class="flex flex-col space-x-2 rtl:space-x-reverse rtl:space-x-2">
-                                    <div class="pr-3 font-body text-base text-textPrimary">Helene Engels</div>
-                                    <div class="pl-3 font-body text-secondary text-tSecondaryLight">Conductrice</div>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    </div>
-                </div>
-            </div>
+            <!-- Espacement supplémentaire -->
+            <div class="h-8"></div>
             
-            <!-- Item 3 -->
-            <div class="hidden" data-carousel-item>
-                <div class="bg-secondary">
-                    <div class="max-w-screen-xl px-4 py-8 mx-auto text-center lg:py-16 lg:px-6">
-                        <figure class="max-w-screen-md mx-auto">
-                            <blockquote>
-                                <p class="text-2xl font-body text-subtitle text-textPrimary">"Plateforme intuitive, conducteurs sympas et trajets sans stress !"</p>
-                            </blockquote>
-                            <figcaption class="flex items-center justify-center mt-6 space-x-3">
-                                <img class="w-6 h-6 rounded-full" src="{{ asset('images/Micheal-Gouch.png') }}" alt="photo de profil">
-                                <div class="flex flex-col space-x-2 rtl:space-x-reverse rtl:space-x-2">
-                                    <div class="pr-3 font-body text-base text-textPrimary">Micheal Gouch</div>
-                                    <div class="pl-3 font-body text-secondary text-tSecondaryLight">Voyageur</div>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    </div>
-                </div>
+            <!-- Indicateurs de navigation -->
+            <div class="flex justify-center space-x-3">
+                {% for i in 0..(topReviews|length - 1) %}
+                    <button class="review-indicator w-4 h-4 rounded-full bg-accent/50 hover:bg-accent transition-colors duration-300 {% if i == 0 %}bg-accent{% endif %}" data-index="{{ i }}"></button>
+                {% endfor %}
             </div>
         </div>
     </div>
 </section>
-#}
+{% endif %}
+
 <!-- Modal de confirmation pour démarrer un trajet -->
 <div id="startRideModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center">
     <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
@@ -259,6 +258,9 @@ document.addEventListener('DOMContentLoaded', function() {
         new CityAutocomplete('home-departure', 'home-departure-suggestions');
         new CityAutocomplete('home-arrival', 'home-arrival-suggestions');
     }
+    
+    // Initialiser le carousel des avis
+    initReviewsCarousel();
 });
 
 let rideToStart = null;
@@ -354,6 +356,72 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Fonction pour gérer le carousel des avis
+function initReviewsCarousel() {
+    const carousel = document.getElementById('reviewsCarousel');
+    const indicators = document.querySelectorAll('.review-indicator');
+    const slides = document.querySelectorAll('.review-slide');
+    
+    if (!carousel || slides.length === 0) return;
+    
+    let currentIndex = 0;
+    let interval;
+    
+    // Fonction pour afficher un avis spécifique
+    function showSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        
+        currentIndex = index;
+        const translateX = -index * 100;
+        carousel.style.transform = `translateX(${translateX}%)`;
+        
+        // Mettre à jour les indicateurs
+        indicators.forEach((indicator, i) => {
+            if (i === index) {
+                indicator.classList.add('bg-accent');
+                indicator.classList.remove('bg-accent/50');
+            } else {
+                indicator.classList.remove('bg-accent');
+                indicator.classList.add('bg-accent/50');
+            }
+        });
+    }
+    
+    // Fonction pour passer à l'avis suivant
+    function nextSlide() {
+        showSlide(currentIndex + 1);
+    }
+    
+    // Démarrer la rotation automatique
+    function startAutoRotation() {
+        interval = setInterval(nextSlide, 10000); // 10 secondes
+    }
+    
+    // Arrêter la rotation automatique
+    function stopAutoRotation() {
+        if (interval) {
+            clearInterval(interval);
+        }
+    }
+    
+    // Gestionnaires d'événements pour les indicateurs
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            stopAutoRotation();
+            showSlide(index);
+            startAutoRotation(); // Redémarrer après interaction manuelle
+        });
+    });
+    
+    // Pause au survol
+    carousel.addEventListener('mouseenter', stopAutoRotation);
+    carousel.addEventListener('mouseleave', startAutoRotation);
+    
+    // Démarrer la rotation automatique
+    startAutoRotation();
+}
 </script>
 
 {% endblock %}

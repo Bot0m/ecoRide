@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\RideRepository;
+use App\Repository\ReviewRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -11,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class HomeCrontrollerController extends AbstractController
 {
     #[Route('/', name: 'homepage')]
-    public function index(RideRepository $rideRepository): Response
+    public function index(RideRepository $rideRepository, ReviewRepository $reviewRepository): Response
     {
         $todayRides = [];
         $userParticipations = [];
@@ -29,9 +30,26 @@ final class HomeCrontrollerController extends AbstractController
             }
         }
 
+        // Récupérer les 3 derniers avis validés avec 3 étoiles ou plus
+        $topReviews = $reviewRepository->createQueryBuilder('r')
+            ->leftJoin('r.author', 'author')
+            ->leftJoin('r.reviewedUser', 'reviewed')
+            ->leftJoin('r.participation', 'p')
+            ->leftJoin('p.ride', 'ride')
+            ->addSelect('author', 'reviewed', 'p', 'ride')
+            ->where('r.isValidated = :validated')
+            ->andWhere('r.rating >= :minRating')
+            ->setParameter('validated', true)
+            ->setParameter('minRating', 3)
+            ->orderBy('r.id', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('home/index.html.twig', [
             'todayRides' => $todayRides,
             'userParticipations' => $userParticipations,
+            'topReviews' => $topReviews,
         ]);
     }
 }

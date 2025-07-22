@@ -298,7 +298,7 @@ class UserController extends AbstractController
         // Fusion et tri de tous les voyages de l'utilisateur
         $allUserRides = array_merge($allDrivenRides, $allPassengerRides);
         
-        // Tri par date et heure (du plus proche au plus éloigné)
+        // Tri par date et heure (du plus récent au plus vieux pour l'historique)
         usort($allUserRides, function($a, $b) {
             // Créer des DateTime complets avec date et heure de départ
             $dateTimeA = clone $a->getDate();
@@ -313,7 +313,7 @@ class UserController extends AbstractController
                 $b->getDepartureTime()->format('i')
             );
             
-            return $dateTimeA <=> $dateTimeB;
+            return $dateTimeB <=> $dateTimeA; // Ordre décroissant (du plus récent au plus vieux)
         });
         
         // Séparation entre voyages futurs et passés
@@ -329,11 +329,42 @@ class UserController extends AbstractController
                 $pastRides[] = $ride;
             }
         }
+        
+        // Tri des voyages à venir du plus proche au plus éloigné
+        usort($upcomingRides, function($a, $b) {
+            $dateTimeA = clone $a->getDate();
+            $dateTimeA->setTime(
+                $a->getDepartureTime()->format('H'),
+                $a->getDepartureTime()->format('i')
+            );
+            
+            $dateTimeB = clone $b->getDate();
+            $dateTimeB->setTime(
+                $b->getDepartureTime()->format('H'),
+                $b->getDepartureTime()->format('i')
+            );
+            
+            return $dateTimeA <=> $dateTimeB; // Ordre croissant pour les voyages à venir
+        });
+
+        // Pagination pour l'historique des voyages
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 10; // 10 voyages par page
+        $offset = ($page - 1) * $limit;
+        
+        $totalPastRides = count($pastRides);
+        $totalPages = ceil($totalPastRides / $limit);
+        
+        // Paginer les voyages passés
+        $paginatedPastRides = array_slice($pastRides, $offset, $limit);
 
         return $this->render('user/rides.html.twig', [
             'upcomingRides' => $upcomingRides,
-            'pastRides' => $pastRides,
+            'pastRides' => $paginatedPastRides,
             'form' => $form->createView(),
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalPastRides' => $totalPastRides,
         ]);
     }
 
