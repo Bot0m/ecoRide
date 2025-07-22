@@ -1,7 +1,7 @@
 services:
   - type: web
     name: ecoride
-    env: docker
+    env: static
     plan: free
     branch: main
     buildCommand: "composer install --no-dev --optimize-autoloader"
@@ -13,3 +13,7 @@ services:
         value: "0"
       - key: APP_SECRET
         generateValue: true
+      - key: DATABASE_URL
+        value: mysql://TONUSER:TONPASS@TONHOST:3306/TONNOMDEBASE
+      - key: MONGODB_URL
+        value: mongodb+srv://TONUSER:TONPASS@toncluster.mongodb.net/TONDB
