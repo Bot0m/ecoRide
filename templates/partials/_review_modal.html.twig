@@ -1,0 +1,295 @@
+<!-- Modal pour laisser un avis -->
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 max-w-2xl w-full max-h-[90vh] transform transition-all">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-subtitle font-title text-backgroundDark">Laisser un avis</h3>
+                <button onclick="closeReviewModal()" class="text-backgroundDark hover:text-background transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Informations du trajet -->
+            <div class="bg-white/10 rounded-xl p-4 mb-6">
+                <h4 class="text-body font-base text-backgroundDark mb-3">Informations du trajet</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <span class="text-background block">Trajet</span>
+                        <p class="text-backgroundDark font-base" id="reviewRideRoute"></p>
+                    </div>
+                    <div>
+                        <span class="text-background block">Date</span>
+                        <p class="text-backgroundDark font-base" id="reviewRideDate"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire d'avis -->
+            <form id="reviewForm" class="space-y-6">
+                <input type="hidden" id="reviewRideId" name="rideId">
+                <input type="hidden" id="reviewUserId" name="userId">
+                
+                <!-- Sélection de l'utilisateur à évaluer -->
+                <div>
+                    <label for="reviewedUser" class="block text-sm font-base text-backgroundDark mb-2">
+                        Évaluer un utilisateur
+                    </label>
+                    <select id="reviewedUser" name="reviewedUser" required class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-backgroundDark placeholder-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                        <option value="">Sélectionnez un utilisateur</option>
+                    </select>
+                </div>
+
+                <!-- Note -->
+                <div>
+                    <label class="block text-sm font-base text-backgroundDark mb-2">Note</label>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1" id="ratingStars">
+                            {% for i in 1..5 %}
+                                <button type="button" 
+                                    class="rating-star w-8 h-8 text-gray-400 hover:text-yellow-400 transition-colors duration-200" 
+                                    data-rating="{{ i }}">
+                                    <svg class="w-full h-full" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <span class="text-background text-sm ml-2">
+                            <span id="selectedRating">0</span>/5
+                        </span>
+                    </div>
+                    <input type="hidden" id="ratingInput" name="rating" required>
+                </div>
+
+                <!-- Commentaire -->
+                <div>
+                    <label for="comment" class="block text-sm font-base text-backgroundDark mb-2">
+                        Commentaire (optionnel)
+                    </label>
+                    <textarea 
+                        id="comment" 
+                        name="comment" 
+                        rows="4" 
+                        placeholder="Partagez votre expérience..."
+                        class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-backgroundDark placeholder-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"></textarea>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeReviewModal()" class="flex-1 bg-white/10 hover:bg-white/20 text-backgroundDark font-base px-6 py-3 rounded-lg transition-all duration-300">
+                        Annuler
+                    </button>
+                    <button type="submit" class="flex-1 bg-accent hover:bg-accentDark text-textSecondary hover:text-textPrimary font-base px-6 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
+                        Envoyer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedRating = 0;
+
+// Fonction pour ouvrir le modal d'avis
+function openReviewModal(rideId, rideDeparture, rideArrival, rideDate, rideTime, ridePrice, availableSeats) {
+    // Remplir les informations du trajet
+    document.getElementById('reviewRideId').value = rideId;
+    document.getElementById('reviewRideRoute').textContent = `${rideDeparture} → ${rideArrival}`;
+    document.getElementById('reviewRideDate').textContent = `${rideDate} à ${rideTime}`;
+    
+    // Charger les utilisateurs à évaluer
+    loadUsersToReview(rideId);
+    
+    // Afficher le modal
+    document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+// Fonction pour fermer le modal d'avis
+function closeReviewModal() {
+    document.getElementById('reviewModal').classList.add('hidden');
+    resetReviewForm();
+}
+
+// Fonction pour réinitialiser le formulaire
+function resetReviewForm() {
+    document.getElementById('reviewForm').reset();
+    selectedRating = 0;
+    updateRatingDisplay();
+    document.getElementById('reviewedUser').innerHTML = '<option value="">Sélectionnez un utilisateur</option>';
+}
+
+// Fonction pour charger les utilisateurs à évaluer
+function loadUsersToReview(rideId) {
+    console.log('Chargement des utilisateurs pour le trajet:', rideId);
+    fetch(`/ride/${rideId}/users-to-review`)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Données reçues:', data);
+            const select = document.getElementById('reviewedUser');
+            select.innerHTML = '<option value="">Sélectionnez un utilisateur</option>';
+            
+            if (data.users && data.users.length > 0) {
+                data.users.forEach(user => {
+                    console.log('Ajout utilisateur:', user);
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.pseudo} (${user.role})`;
+                    select.appendChild(option);
+                });
+            } else {
+                console.log('Aucun utilisateur trouvé');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors du chargement des utilisateurs:', error);
+        });
+}
+
+// Gestion des étoiles de notation
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.rating-star');
+    
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            selectedRating = rating;
+            updateRatingDisplay();
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            highlightStars(rating);
+        });
+    });
+    
+    // Réinitialiser les étoiles quand on quitte la zone
+    document.getElementById('ratingStars').addEventListener('mouseleave', function() {
+        highlightStars(selectedRating);
+    });
+});
+
+// Fonction pour mettre à jour l'affichage des étoiles
+function highlightStars(rating) {
+    const stars = document.querySelectorAll('.rating-star');
+    stars.forEach((star, index) => {
+        if (index < rating) {
+            star.classList.remove('text-gray-400');
+            star.classList.add('text-yellow-400');
+        } else {
+            star.classList.remove('text-yellow-400');
+            star.classList.add('text-gray-400');
+        }
+    });
+    document.getElementById('selectedRating').textContent = rating;
+    document.getElementById('ratingInput').value = rating;
+}
+
+// Fonction pour mettre à jour l'affichage de la note
+function updateRatingDisplay() {
+    highlightStars(selectedRating);
+}
+
+// Gestion de la soumission du formulaire
+document.getElementById('reviewForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {
+        rideId: formData.get('rideId'),
+        reviewedUserId: formData.get('reviewedUser'),
+        rating: formData.get('rating'),
+        comment: formData.get('comment')
+    };
+    
+    // Validation
+    if (!data.reviewedUserId || !data.rating) {
+        alert('Veuillez sélectionner un utilisateur et donner une note');
+        return;
+    }
+    
+    // Envoyer l'avis
+    console.log('Envoi des données:', data);
+    fetch('/review/submit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            closeReviewModal();
+            showReviewSuccessPopup('Votre avis a été envoyé avec succès et sera visible une fois que la modération l\'aura validé.');
+        } else {
+            alert(data.message || 'Erreur lors de l\'envoi de l\'avis');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'envoi de l\'avis');
+    });
+});
+
+// Fonction pour afficher le popup de succès pour les avis
+function showReviewSuccessPopup(message) {
+    // Créer le popup
+    const popup = document.createElement('div');
+    popup.className = 'review-success-popup fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center';
+    popup.innerHTML = `
+        <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-6 max-w-md mx-4 transform transition-all">
+            <div class="text-center">
+                <h3 class="text-subtitle font-title text-backgroundDark mb-2">Avis envoyé !</h3>
+                <p class="text-backgroundDark text-sm">${message}</p>
+            </div>
+        </div>
+    `;
+    
+    // Ajouter le popup au body
+    document.body.appendChild(popup);
+    
+    // Fermer le popup en cliquant dessus
+    popup.addEventListener('click', function() {
+        closeReviewSuccessPopup();
+    });
+}
+
+// Fonction pour fermer le popup de succès pour les avis
+function closeReviewSuccessPopup() {
+    const popup = document.querySelector('.review-success-popup');
+    if (popup) {
+        popup.style.opacity = '0';
+        popup.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => popup.remove(), 300);
+    }
+}
+
+// Fermer le modal en cliquant en dehors
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('reviewModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReviewModal();
+            }
+        });
+    }
+});
+</script> 

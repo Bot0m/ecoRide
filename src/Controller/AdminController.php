@@ -274,6 +274,28 @@ class AdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
+        // Compter les employés actifs
+        $activeEmployees = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->andWhere('u.isActive = :isActive')
+            ->setParameter('role', '%ROLE_EMPLOYE%')
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Compter les employés suspendus
+        $suspendedEmployees = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles LIKE :role')
+            ->andWhere('u.isActive = :isActive')
+            ->setParameter('role', '%ROLE_EMPLOYE%')
+            ->setParameter('isActive', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+
         // Récupérer les employés paginés
         $employees = $entityManager->getRepository(User::class)
             ->createQueryBuilder('u')
@@ -300,6 +322,8 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'totalEmployees' => $totalEmployees,
+            'activeEmployees' => $activeEmployees,
+            'suspendedEmployees' => $suspendedEmployees,
         ]);
     }
 
@@ -367,6 +391,30 @@ class AdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
+        // Compter les utilisateurs actifs
+        $activeUsers = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles NOT LIKE :admin AND u.roles NOT LIKE :employe')
+            ->andWhere('u.isActive = :isActive')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('employe', '%ROLE_EMPLOYE%')
+            ->setParameter('isActive', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Compter les utilisateurs suspendus
+        $suspendedUsers = $entityManager->getRepository(User::class)
+            ->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.roles NOT LIKE :admin AND u.roles NOT LIKE :employe')
+            ->andWhere('u.isActive = :isActive')
+            ->setParameter('admin', '%ROLE_ADMIN%')
+            ->setParameter('employe', '%ROLE_EMPLOYE%')
+            ->setParameter('isActive', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+
         // Récupérer les utilisateurs paginés
         $users = $entityManager->getRepository(User::class)
             ->createQueryBuilder('u')
@@ -386,6 +434,8 @@ class AdminController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'suspendedUsers' => $suspendedUsers,
         ]);
     }
 

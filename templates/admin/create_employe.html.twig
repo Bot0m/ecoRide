@@ -112,10 +112,18 @@
 
             <!-- Statistiques -->
             <div class="mt-6 pt-6 border-t border-accent/20">
-                <div class="text-center">
-                    <div class="bg-accent/10 rounded-lg p-4 max-w-xs mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-accent/10 rounded-lg p-4">
                         <div class="text-subtitle font-title text-accent">{{ totalEmployees }}</div>
                         <div class="text-secondary font-body text-textSecondary">Total employés</div>
+                    </div>
+                    <div class="bg-green-100 rounded-lg p-4">
+                        <div class="text-subtitle font-title text-green-600">{{ activeEmployees }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Comptes actifs</div>
+                    </div>
+                    <div class="bg-red-100 rounded-lg p-4">
+                        <div class="text-subtitle font-title text-red-600">{{ suspendedEmployees }}</div>
+                        <div class="text-secondary font-body text-textSecondary">Comptes suspendus</div>
                     </div>
                 </div>
             </div>

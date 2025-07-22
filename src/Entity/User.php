@@ -49,6 +49,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean')]
     private bool $isActive = true;
 
+    #[ORM\Column(type: 'decimal', precision: 3, scale: 1, options: ['default' => 5.0])]
+    private float $averageRating = 5.0;
+
     /**
      * @var Collection<int, Vehicle>
      */
@@ -233,6 +236,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsActive(bool $isActive): static
     {
         $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function getAverageRating(): float
+    {
+        return $this->averageRating;
+    }
+
+    public function setAverageRating(float $averageRating): static
+    {
+        $this->averageRating = $averageRating;
 
         return $this;
     }

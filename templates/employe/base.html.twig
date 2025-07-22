@@ -8,7 +8,7 @@
         <h2 class="text-title font-title text-textPrimary mb-6">Espace Employé</h2>
         <nav class="flex flex-col gap-4">
             <a href="{{ path('employe_dashboard') }}" class="employe-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
-                Dashboard
+                Espace employé
             </a>
             <a href="{{ path('employe_all_rides') }}" class="employe-nav-link flex items-center gap-3 text-body font-base text-textSecondary px-4 py-3 rounded-lg transition-all duration-300 hover:text-accent">
                 Tous les voyages
@@ -27,6 +27,26 @@
     <div class="max-w-4xl mx-auto">
         {% block employe_content %}{% endblock %}
     </div>
+</div>
+
+<!-- Modal de confirmation de déconnexion -->
+<div id="logoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center">
+  <div class="backdrop-blur-xl backdrop-saturate-150 backdrop-contrast-125 bg-white/30 rounded-2xl shadow-2xl border border-white/30 p-8 max-w-md mx-4 transform transition-all">
+    <div class="text-center">
+      <h3 class="text-subtitle font-title text-backgroundDark mb-2">Déconnexion</h3>
+      <p class="text-background mb-6">
+        Êtes-vous sûr de vouloir vous déconnecter ?
+      </p>
+      <div class="flex gap-4 justify-end">
+        <button id="confirmLogoutBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary font-base py-3 px-6 rounded-xl transition-all duration-300">
+          Oui, me déconnecter
+        </button>
+        <button id="cancelLogoutBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-6 rounded-xl hover:bg-background/60 transition-all duration-300">
+          Annuler
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Modals -->
@@ -53,9 +73,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Fonction de confirmation de déconnexion
 function confirmLogout(event) {
     event.preventDefault();
     document.getElementById('logoutModal').classList.remove('hidden');
 }
+
+// Gestionnaires d'événements pour le modal de déconnexion
+document.getElementById('confirmLogoutBtn').addEventListener('click', function() {
+    window.location.href = '{{ path('app_logout') }}';
+});
+
+document.getElementById('cancelLogoutBtn').addEventListener('click', function() {
+    document.getElementById('logoutModal').classList.add('hidden');
+});
+
+// Fermer la modal en cliquant en dehors
+document.getElementById('logoutModal').addEventListener('click', function(event) {
+    if (event.target === this) {
+        this.classList.add('hidden');
+    }
+});
 </script>
 {% endblock %} 

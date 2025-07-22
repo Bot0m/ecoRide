@@ -3,65 +3,79 @@
 {% block title %}Tous les voyages{% endblock %}
 
 {% block employe_content %}
-<div class="space-y-6">
     <!-- En-tête de bienvenue -->
     <div class="bg-gradient-to-r from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
         <h1 class="text-title font-title text-textPrimary mb-2">Tous les voyages</h1>
         <p class="text-lg text-textSecondary">{{ totalRides }} voyage(s) au total</p>
     </div>
 
-    <!-- Liste des voyages -->
-    <div class="space-y-4">
-        {% if rides is empty %}
-            <div class="text-center py-12">
-                <svg class="w-16 h-16 text-textSecondary mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                <p class="text-textSecondary">Aucun voyage trouvé</p>
+    <!-- Section des voyages à venir -->
+    <div class="mb-12">
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Voyages à venir ({{ totalUpcomingRides }})</h2>
+        
+        {% if upcomingRides is empty %}
+            <div class="bg-gradient-to-br from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-lg font-title text-textSecondary mb-2">Aucun voyage à venir</h3>
+                    <p class="text-textSecondary">
+                        Aucun voyage n'est prévu prochainement.
+                    </p>
+                </div>
             </div>
         {% else %}
-            {% for ride in rides %}
-                <div class="bg-gradient-to-br from-secondary/70 to-secondary/90 backdrop-blur-xl border border-white/30 rounded-2xl p-6 shadow-xl">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <!-- Informations principales -->
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-3">
-                                <h3 class="text-lg font-title text-textPrimary">
-                                    {{ ride.departure }} → {{ ride.arrival }}
-                                </h3>
-                                {% if ride.isEcological %}
-                                    <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                                        🌱 Écologique
-                                    </span>
-                                {% endif %}
-                                <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400 text-xs rounded-full">
-                                    {{ ride.status == 'actif' ? 'ACTIF' : ride.status == 'annule' ? 'ANNULÉ' : ride.status == 'en_cours' ? 'EN COURS' : 'TERMINÉ' }}
-                                </span>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {% for ride in upcomingRides %}
+                    <div class="bg-gradient-to-br from-accent/20 to-accent/10 backdrop-blur-sm rounded-2xl p-6 border border-accent/30 hover:border-accent/50 transition-all duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
                                 <div>
-                                    <p class="text-textSecondary">Date</p>
-                                    <p class="text-textPrimary font-base">{{ ride.date|date('d/m/Y') }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-textSecondary">Heure départ</p>
-                                    <p class="text-textPrimary font-base">{{ ride.departureTime|date('H:i') }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-textSecondary">Prix</p>
-                                    <p class="text-textPrimary font-base">{{ ride.price }} crédits</p>
-                                </div>
-                                <div>
-                                    <p class="text-textSecondary">Places disponibles</p>
-                                    <p class="text-textPrimary font-base">{{ ride.availableSeats }}/{{ ride.vehicle ? ride.vehicle.seats : 'N/A' }}</p>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                        {% if ride.isEcological %}
+                                            <span class="bg-green-500/20 text-textSecondary text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                                🌱 ÉCO
+                                            </span>
+                                        {% endif %}
+                                        <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400 text-xs rounded-full font-base border border-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400/30">
+                                            {{ ride.status == 'actif' ? 'ACTIF' : ride.status == 'annule' ? 'ANNULÉ' : ride.status == 'en_cours' ? 'EN COURS' : 'TERMINÉ' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-body text-textSecondary">
+                                        <span>{{ ride.date|date('d/m/Y') }}</span>
+                                        <span>{{ ride.departureTime|date('H:i') }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Prix par passager</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.price }} crédits</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Places disponibles</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.availableSeats }}/{{ ride.vehicle ? ride.vehicle.seats : 'N/A' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Véhicule</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.vehicle ? ride.vehicle.brand ~ ' ' ~ ride.vehicle.model : 'N/A' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Arrivée estimée</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.arrivalTime|date('H:i') }}</span>
+                            </div>
+                            {% if ride.date|date('Y-m-d') == "now"|date('Y-m-d') %}
+                                <div class="flex items-center justify-center">
+                                    <span class="bg-background/20 text-textPrimary text-xs px-3 py-1 rounded-full font-base border border-textPrimary/30">
+                                        Aujourd'hui
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
                         <!-- Informations conducteur -->
-                        <div class="lg:text-right">
+                        <div class="mt-4 pt-4 border-t border-accent/30">
                             <div class="flex items-center gap-3 mb-2">
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-sm font-base">
                                     {% if ride.driver.avatar %}
@@ -75,46 +89,111 @@
                                     <p class="text-textSecondary text-sm">{{ ride.driver.email }}</p>
                                 </div>
                             </div>
-                            
-                            {% if ride.vehicle %}
-                                <div class="text-sm">
-                                    <p class="text-textSecondary">{{ ride.vehicle.brand }} {{ ride.vehicle.model }}</p>
-                                    <p class="text-textSecondary">{{ ride.vehicle.energy }}</p>
-                                </div>
-                            {% endif %}
+                        </div>
+                        
+                        <!-- Lien "En savoir plus" -->
+                        <div class="mt-4 pt-4 border-t border-accent/30">
+                            <button onclick="openRideDetailsModal({{ ride.id }})" class="inline-flex items-center text-accent hover:text-accentDark font-base transition-colors duration-300">
+                                En savoir plus
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Participants -->
-                    {% if ride.participations is not empty %}
-                        <div class="mt-4 pt-4 border-t border-white/20">
-                            <p class="text-textSecondary text-sm mb-2">Participants ({{ ride.participations|length }})</p>
-                            <div class="flex flex-wrap gap-2">
-                                {% for participation in ride.participations %}
-                                    <div class="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
-                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-xs">
-                                            {% if participation.user.avatar %}
-                                                <img src="{{ participation.user.avatar }}" alt="Avatar" class="w-6 h-6 rounded-full object-cover">
-                                            {% else %}
-                                                {{ participation.user.pseudo|first|upper }}
-                                            {% endif %}
-                                        </div>
-                                        <span class="text-textPrimary text-sm">{{ participation.user.pseudo }}</span>
-                                        <span class="px-2 py-0.5 bg-{{ participation.status == 'acceptee' ? 'green' : participation.status == 'en_attente' ? 'yellow' : 'red' }}-500/20 text-{{ participation.status == 'acceptee' ? 'green' : participation.status == 'en_attente' ? 'yellow' : 'red' }}-400 text-xs rounded-full">
-                                            {{ participation.status|upper }}
-                                        </span>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         {% endif %}
     </div>
 
-    <!-- Pagination -->
-    {% if totalPages > 1 %}
+    <!-- Section de l'historique -->
+    <div>
+        <h2 class="text-subtitle font-title text-textPrimary mb-6">Historique des voyages ({{ totalPastRides }})</h2>
+        
+        {% if pastRides is empty %}
+            <div class="bg-gradient-to-br from-secondary/20 to-background/50 backdrop-blur-sm rounded-2xl p-8 border border-white/20 text-center">
+                <div class="max-w-md mx-auto">
+                    <h3 class="text-lg font-title text-textSecondary mb-2">Aucun voyage passé</h3>
+                    <p class="text-textSecondary">
+                        L'historique des voyages apparaîtra ici une fois que des trajets auront été effectués.
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {% for ride in pastRides %}
+                    <div class="bg-gradient-to-br from-backgroundDark to-backgroundLight backdrop-blur-sm rounded-2xl p-6 border border-backgroundDark/30 hover:border-backgroundDark/50 transition-all duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-subtitle font-title text-textPrimary">{{ ride.departure }} → {{ ride.arrival }}</h3>
+                                        {% if ride.isEcological %}
+                                            <span class="bg-green-500/20 text-textSecondary text-xs px-2 py-1 rounded-full font-base border border-green-400/30">
+                                                🌱 ÉCO
+                                            </span>
+                                        {% endif %}
+                                        <span class="px-2 py-1 bg-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-500/20 text-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400 text-xs rounded-full font-base border border-{{ ride.status == 'actif' ? 'green' : ride.status == 'annule' ? 'red' : ride.status == 'en_cours' ? 'yellow' : 'blue' }}-400/30">
+                                            {{ ride.status == 'actif' ? 'ACTIF' : ride.status == 'annule' ? 'ANNULÉ' : ride.status == 'en_cours' ? 'EN COURS' : 'TERMINÉ' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-4 text-body text-textSecondary">
+                                        <span>{{ ride.date|date('d/m/Y') }}</span>
+                                        <span>{{ ride.departureTime|date('H:i') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Prix par passager</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.price }} crédits</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Véhicule</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.vehicle ? ride.vehicle.brand ~ ' ' ~ ride.vehicle.model : 'N/A' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-body text-textSecondary">Arrivée</span>
+                                <span class="text-body font-base text-textPrimary">{{ ride.arrivalTime|date('H:i') }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Informations conducteur -->
+                        <div class="mt-4 pt-4 border-t border-backgroundDark/30">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-accent/40 to-accent/60 flex items-center justify-center text-white text-sm font-base">
+                                    {% if ride.driver.avatar %}
+                                        <img src="{{ ride.driver.avatar }}" alt="Avatar" class="w-8 h-8 rounded-full object-cover">
+                                    {% else %}
+                                        {{ ride.driver.pseudo|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="text-textPrimary font-base">{{ ride.driver.pseudo }}</p>
+                                    <p class="text-textSecondary text-sm">{{ ride.driver.email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lien "En savoir plus" -->
+                        <div class="mt-4 pt-4 border-t border-backgroundDark/30">
+                            <button onclick="openRideDetailsModal({{ ride.id }})" class="inline-flex items-center text-accent hover:text-accentDark font-base transition-colors duration-300">
+                                En savoir plus
+                                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination pour les voyages à venir -->
+    {% if totalUpcomingPages > 1 %}
         <div class="flex justify-center mt-8">
             <nav class="flex items-center gap-2">
                 {% if currentPage > 1 %}
@@ -123,7 +202,7 @@
                     </a>
                 {% endif %}
                 
-                {% for page in 1..totalPages %}
+                {% for page in 1..totalUpcomingPages %}
                     {% if page == currentPage %}
                         <span class="px-4 py-2 bg-accent text-white rounded-lg">{{ page }}</span>
                     {% else %}
@@ -133,7 +212,7 @@
                     {% endif %}
                 {% endfor %}
                 
-                {% if currentPage < totalPages %}
+                {% if currentPage < totalUpcomingPages %}
                     <a href="{{ path('employe_all_rides', {page: currentPage + 1}) }}" class="px-4 py-2 bg-secondary/70 border border-white/30 rounded-lg text-textSecondary hover:text-accent transition-colors">
                         Suivant
                     </a>
@@ -141,5 +220,4 @@
             </nav>
         </div>
     {% endif %}
-</div>
 {% endblock %} 

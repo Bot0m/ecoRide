@@ -537,4 +537,53 @@ class UserController extends AbstractController
             'message' => 'Notification marquée comme lue'
         ]);
     }
+
+    #[Route('/user/{id}/reviews', name: 'app_user_reviews', methods: ['GET'])]
+    public function getUserReviews(User $user, EntityManagerInterface $entityManager): JsonResponse
+    {
+        try {
+            // Récupérer les avis validés reçus par l'utilisateur (requête simplifiée)
+            $reviews = $entityManager->getRepository(\App\Entity\Review::class)
+                ->findBy([
+                    'reviewedUser' => $user,
+                    'isValidated' => true
+                ]);
+
+            $reviewsData = [];
+            foreach ($reviews as $review) {
+                $rideInfo = '';
+                if ($review->getParticipation() && $review->getParticipation()->getRide()) {
+                    $ride = $review->getParticipation()->getRide();
+                    $rideInfo = $ride->getDeparture() . ' → ' . $ride->getArrival() . ' (' . $ride->getDate()->format('d/m/Y') . ')';
+                }
+
+                $reviewsData[] = [
+                    'id' => $review->getId(),
+                    'rating' => $review->getRating(),
+                    'comment' => $review->getComment(),
+                    'createdAt' => 'Récemment', // Pas de champ createdAt dans l'entité
+                    'author' => [
+                        'id' => $review->getAuthor()->getId(),
+                        'pseudo' => $review->getAuthor()->getPseudo(),
+                        'avatar' => $review->getAuthor()->getAvatar(),
+                    ],
+                    'rideInfo' => $rideInfo
+                ];
+            }
+
+            return new JsonResponse([
+                'user' => [
+                    'id' => $user->getId(),
+                    'pseudo' => $user->getPseudo(),
+                    'avatar' => $user->getAvatar(),
+                    'averageRating' => $user->getAverageRating(),
+                ],
+                'reviews' => $reviewsData
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'Erreur lors de la récupération des avis: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

@@ -32,11 +32,40 @@ final class EmployeController extends AbstractController
         $limit = 10;
         $offset = ($page - 1) * $limit;
 
-        // Récupérer tous les voyages avec pagination
-        $rides = $rideRepository->createQueryBuilder('r')
+        $today = new \DateTime();
+        $today->setTime(0, 0, 0);
+
+        // Récupérer les voyages à venir (date >= aujourd'hui)
+        $upcomingRides = $rideRepository->createQueryBuilder('r')
             ->leftJoin('r.driver', 'd')
             ->leftJoin('r.vehicle', 'v')
             ->addSelect('d', 'v')
+            ->where('r.date >= :today')
+            ->setParameter('today', $today)
+            ->orderBy('r.date', 'ASC')
+            ->addOrderBy('r.departureTime', 'ASC')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery()
+            ->getResult();
+
+        // Compter le total des voyages à venir pour la pagination
+        $totalUpcomingRides = $rideRepository->createQueryBuilder('r')
+            ->select('COUNT(r.id)')
+            ->where('r.date >= :today')
+            ->setParameter('today', $today)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $totalUpcomingPages = ceil($totalUpcomingRides / $limit);
+
+        // Récupérer les voyages passés (date < aujourd'hui)
+        $pastRides = $rideRepository->createQueryBuilder('r')
+            ->leftJoin('r.driver', 'd')
+            ->leftJoin('r.vehicle', 'v')
+            ->addSelect('d', 'v')
+            ->where('r.date < :today')
+            ->setParameter('today', $today)
             ->orderBy('r.date', 'DESC')
             ->addOrderBy('r.departureTime', 'DESC')
             ->setMaxResults($limit)
@@ -44,18 +73,27 @@ final class EmployeController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        // Compter le total pour la pagination
-        $totalRides = $rideRepository->createQueryBuilder('r')
+        // Compter le total des voyages passés pour la pagination
+        $totalPastRides = $rideRepository->createQueryBuilder('r')
             ->select('COUNT(r.id)')
+            ->where('r.date < :today')
+            ->setParameter('today', $today)
             ->getQuery()
             ->getSingleScalarResult();
 
-        $totalPages = ceil($totalRides / $limit);
+        $totalPastPages = ceil($totalPastRides / $limit);
+
+        // Total général
+        $totalRides = $totalUpcomingRides + $totalPastRides;
 
         return $this->render('employe/all_rides.html.twig', [
-            'rides' => $rides,
+            'upcomingRides' => $upcomingRides,
+            'pastRides' => $pastRides,
             'currentPage' => $page,
-            'totalPages' => $totalPages,
+            'totalUpcomingPages' => $totalUpcomingPages,
+            'totalPastPages' => $totalPastPages,
+            'totalUpcomingRides' => $totalUpcomingRides,
+            'totalPastRides' => $totalPastRides,
             'totalRides' => $totalRides,
         ]);
     }
@@ -73,7 +111,9 @@ final class EmployeController extends AbstractController
         $reviews = $reviewRepository->createQueryBuilder('r')
             ->leftJoin('r.author', 'author')
             ->leftJoin('r.reviewedUser', 'reviewed')
-            ->addSelect('author', 'reviewed')
+            ->leftJoin('r.participation', 'p')
+            ->leftJoin('p.ride', 'ride')
+            ->addSelect('author', 'reviewed', 'p', 'ride')
             ->orderBy('r.id', 'DESC')
             ->setMaxResults($limit)
             ->setFirstResult($offset)

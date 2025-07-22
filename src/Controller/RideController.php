@@ -177,16 +177,14 @@ class RideController extends AbstractController
             }
         }
 
-        // Calculer la note moyenne du conducteur (par défaut 5/5)
-        $driverRating = 5.0;
-        $totalReviews = count($driver->getReviewsReceived());
-        if ($totalReviews > 0) {
-            $totalRating = 0;
-            foreach ($driver->getReviewsReceived() as $review) {
-                $totalRating += $review->getRating();
-            }
-            $driverRating = round($totalRating / $totalReviews, 1);
-        }
+        // Utiliser la note moyenne du conducteur
+        $driverRating = $driver->getAverageRating();
+        
+        // Compter seulement les avis validés
+        $validatedReviews = $driver->getReviewsReceived()->filter(function($review) {
+            return $review->isValidated() === true;
+        });
+        $totalReviews = count($validatedReviews);
 
         $rideDetails = [
             'id' => $ride->getId(),
@@ -204,7 +202,7 @@ class RideController extends AbstractController
                 'avatar' => $driver->getAvatar(),
                 'bio' => $driver->getBio(),
                 'userType' => $driver->getUserType(),
-                'rating' => $driverRating,
+                'averageRating' => $driverRating,
                 'totalReviews' => $totalReviews,
             ],
             'vehicle' => [

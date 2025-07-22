@@ -108,15 +108,15 @@
             <div class="mt-6 pt-6 border-t border-accent/20">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                     <div class="bg-accent/10 rounded-lg p-4">
-                        <div class="text-subtitle font-title text-accent">{{ users|length }}</div>
+                        <div class="text-subtitle font-title text-accent">{{ totalUsers }}</div>
                         <div class="text-secondary font-body text-textSecondary">Total utilisateurs</div>
                     </div>
                     <div class="bg-green-100 rounded-lg p-4">
-                        <div class="text-subtitle font-title text-green-600">{{ users|filter(u => u.isActive)|length }}</div>
+                        <div class="text-subtitle font-title text-green-600">{{ activeUsers }}</div>
                         <div class="text-secondary font-body text-textSecondary">Comptes actifs</div>
                     </div>
                     <div class="bg-red-100 rounded-lg p-4">
-                        <div class="text-subtitle font-title text-red-600">{{ users|filter(u => not u.isActive)|length }}</div>
+                        <div class="text-subtitle font-title text-red-600">{{ suspendedUsers }}</div>
                         <div class="text-secondary font-body text-textSecondary">Comptes suspendus</div>
                     </div>
                 </div>
@@ -190,7 +190,7 @@
                 <h3 id="toggleUserStatusTitle" class="text-subtitle font-title text-backgroundDark mb-2"></h3>
                 <p class="text-background mb-6" id="toggleUserStatusText">
                 </p>
-                <div class="flex gap-3 justify-center">
+                <div class="flex gap-3 justify-end">
                     <button id="confirmToggleUserStatusBtn" class="bg-accent hover:bg-accentDark backdrop-blur-sm hover:backdrop-blur-md text-textSecondary hover:text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl transition-all duration-300 text-base font-body">
                     </button>
                     <button id="cancelToggleUserStatusBtn" class="backdrop-blur-sm bg-background/40 border border-background/30 text-textPrimary font-base py-3 px-4 md:px-6 rounded-xl hover:bg-background/60 transition-all duration-300 text-base font-body">
