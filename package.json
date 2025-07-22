@@ -1,7 +1,6 @@
 {
   "name": "ecoride",
   "version": "1.0.0",
-  "main": "index.js",
   "directories": {
     "test": "tests"
   },
