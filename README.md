@@ -56,7 +56,7 @@ Malgré cette perte de données, le projet a pu continuer grâce à :
 
 ---
 
-## 🚀 Prochaines étapes
+## Prochaines étapes
 
 ### 1. Dockerisation et Déploiement
 
@@ -86,7 +86,7 @@ Malgré cette perte de données, le projet a pu continuer grâce à :
 
 ---
 
-## 📁 Structure du projet
+## Structure du projet
 
 ### Base de données
 - **`BDD/ecoride_db.sql`** : Export complet de la structure et des données de la base de données
@@ -107,7 +107,7 @@ Malgré cette perte de données, le projet a pu continuer grâce à :
 
 ---
 
-## 🔄 Développement continu
+## Développement continu
 
 En attendant le retour de la correction, je continuerai le développement sur une **branche secondaire** pour :
 
