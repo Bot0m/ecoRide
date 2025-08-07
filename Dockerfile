@@ -1,21 +1,35 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.3-fpm-alpine
 
+# Installer les extensions nécessaires
 RUN apk add --no-cache \
-    bash curl git unzip icu-dev libzip-dev oniguruma-dev \
-    autoconf gcc g++ make mysql-client mongodb-tools
+    nginx \
+    bash \
+    curl \
+    git \
+    icu-dev \
+    zlib-dev \
+    libxml2-dev \
+    libzip-dev \
+    oniguruma-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install intl pdo pdo_mysql opcache zip
 
-# PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql intl zip opcache
+# Installer Composer
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# MongoDB extension
-RUN pecl install mongodb && docker-php-ext-enable mongodb
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
+# Préparer les dossiers
 WORKDIR /var/www/html
-COPY --chown=www-data:www-data . .
+COPY . /var/www/html
 
-USER www-data
-RUN composer install --no-scripts --no-interaction --optimize-autoloader
+# Copier la conf Nginx
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-CMD ["php-fpm"]
+# Donne les bons droits
+RUN chown -R www-data:www-data /var/www/html
+
+# Exposer le port NGINX
+EXPOSE 80
+
+# Lancer PHP-FPM + NGINX
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
