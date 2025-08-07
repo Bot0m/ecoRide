@@ -16,7 +16,6 @@ WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .
 
 USER www-data
-RUN git config --global --add safe.directory /var/www/html && \
-    composer install --no-interaction --optimize-autoloader
+RUN composer install --no-interaction --optimize-autoloader
 
 CMD ["php-fpm"]
