@@ -16,6 +16,6 @@ WORKDIR /var/www/html
 COPY --chown=www-data:www-data . .
 
 USER www-data
-RUN composer install --no-interaction --optimize-autoloader
+RUN composer install --no-scripts --no-interaction --optimize-autoloader
 
 CMD ["php-fpm"]
