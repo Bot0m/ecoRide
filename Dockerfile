@@ -18,4 +18,5 @@ COPY --chown=www-data:www-data . .
 USER www-data
 RUN git config --global --add safe.directory /var/www/html && composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-CMD ["php-fpm", "-F"]
+# Remplacez la dernière ligne du Dockerfile
+CMD ["php", "-S", "0.0.0.0:${PORT}", "-t", "public"]
