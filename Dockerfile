@@ -18,7 +18,7 @@ COPY --chown=www-data:www-data . .
 USER www-data
 RUN git config --global --add safe.directory /var/www/html && composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
 
-# Remplacez la dernière ligne du Dockerfile
-# Fallback 8080 si PORT n’est pas défini
-CMD sh -c 'php -S 0.0.0.0:${PORT:-8080} -t public public/index.php'
+# Remplacez votre CMD actuel par :
+    CMD ["sh","-lc","php -S 0.0.0.0:${PORT} -t public public/index.php"]
+
 
