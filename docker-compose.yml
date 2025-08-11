@@ -1,24 +1,23 @@
 version: '3.8'
 
 services:
-  app:
+  php:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ecoride_app
-    volumes:
-      - .:/var/www/html
-    environment:
-      APP_ENV: dev
+    container_name: symfony_php
+    restart: always
     depends_on:
       - mysql
       - mongo
+    volumes:
+      - ./:/var/www/html
     expose:
       - "9000"
 
   mysql:
     image: mysql:8.0-oracle
-    container_name: ecoride_mysql
+    container_name: symfony_mysql
     restart: always
     environment:
       MYSQL_DATABASE: ecoride
@@ -33,26 +32,12 @@ services:
 
   mongo:
     image: mongo:7.0
-    container_name: ecoride_mongo
+    container_name: symfony_mongo
     restart: always
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-
-  php:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: symfony_app
-    restart: always
-    depends_on:
-      - mysql
-      - mongo
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./:/var/www/html
 
   nginx:
     image: nginx:stable-alpine
